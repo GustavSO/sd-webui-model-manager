@@ -3,7 +3,7 @@ import modules.scripts as scripts
 import gradio as gr
 from pathlib import Path
 from tkinter import Tk
-from scripts.c_loader import downloader, loader, model
+from scripts.mm_libs import downloader, loader, model
 from modules import script_callbacks
 
 loader.get_dirs()

@@ -35,6 +35,8 @@ def update_current_model(data):
     match data["type"]:
         case "LORA":
             current_model = model.Lora(data)
+        case "LoCon":
+            current_model = model.Lora(data)
         case _:
             current_model = model.Model(data)
 
