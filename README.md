@@ -1,4 +1,4 @@
-# sd-webui-model-manager
+# Model Manager
 
 A very work in progress extension for AUTOMATIC1111's SD WebUI, with the aim of streamlining the management and download of the various types of models (Checkpoints, LoRAs, TIs etc.)
 
