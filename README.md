@@ -16,7 +16,7 @@ The goal of this extension is to alleviate the aforementioned waste of time by a
     - LoRAs
     - Hypernetworks
     - Embeddings
-    - (LyCORIS support coming VERY soon)
+    - LyCORIS
   - Allows for editing of various information before downloading:
     - Choose target directory
     - Choose filename
@@ -25,7 +25,11 @@ The goal of this extension is to alleviate the aforementioned waste of time by a
     - When downloading a LoRA file, a .JSON file is saved in the same location. This contains various information, of note is activation words, allowing for easier use of downloaded LoRAs.
 
 
-## TODO:
+### Known issues:
+
+- Some larger files (mostly checkpoints) sometimes doesn't download correctly.
+
+### TODO:
 
 - Indexing using SHA256 as to recognize already downloaded files
 - A model editor page, for editing already installed models

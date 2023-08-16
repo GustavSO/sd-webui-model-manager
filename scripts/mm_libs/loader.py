@@ -7,6 +7,7 @@ folders = {
     "Hypernetwork": Path(shared.cmd_opts.hypernetwork_dir),
     "Checkpoint": Path(shared.cmd_opts.ckpt_dir),
     "LORA": Path(shared.cmd_opts.lora_dir),
+    "LoCon": Path(shared.cmd_opts.lora_dir)
 }
 
 # TODO: This could problably be done more elegantly
