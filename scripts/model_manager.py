@@ -3,12 +3,15 @@ import modules.scripts as scripts
 import gradio as gr
 from pathlib import Path
 from tkinter import Tk
-from scripts.mm_libs import downloader, loader, model
+from scripts.mm_libs import downloader, loader, model, state
+from scripts.mm_libs.state import settings
 from modules import script_callbacks
 
 loader.get_dirs()
 auto_paste = True
 dir_list = []
+
+test = {"Huh": False}
 
 
 def select_image(evt: gr.SelectData):
@@ -21,7 +24,7 @@ def on_ui_tabs():
             url = Tk().clipboard_get()
 
         (m_result, images) = downloader.fetch(url)
-        if m_result:
+        if (m_result, images):
             return {
                 model_box: gr.update(visible=True),
                 model_url_input: url,
@@ -30,8 +33,12 @@ def on_ui_tabs():
                 model_creator_output: m_result.creator,
                 model_type_output: m_result.type,
                 file_name_input: f"{m_result.name} {m_result.version} ({m_result.creator})",
-                model_keywords_output: gr.update(value=m_result.metadata["activation text"], visible=True) if isinstance(m_result, model.Lora) else gr.update(visible=False),
-                model_base_output: m_result.base_model
+                model_keywords_output: gr.update(
+                    value=m_result.metadata["activation text"], visible=True
+                )
+                if m_result.type in ("LORA", "LoCon")
+                else gr.update(visible=False),
+                model_base_output: m_result.base_model,
             }
         return {
             model_url_input: url,
@@ -53,7 +60,9 @@ def on_ui_tabs():
         subdirs = []
         for item in loader.folders[m_type]:
             subdirs.append(
-                item.relative_to(*item.parts[: len(loader.folders[m_type][0].parts) - 1])
+                item.relative_to(
+                    *item.parts[: len(loader.folders[m_type][0].parts) - 1]
+                )
             )
         dir_list = subdirs.copy()
         return target_dir_drop.update(value=subdirs[0], choices=subdirs)
@@ -121,16 +130,16 @@ def on_ui_tabs():
                     )
                     download_btn = gr.Button("Download")
 
-        # TODO: Implement a settigns page
-        # with gr.Tab("Settings", visible=False):
-        #     auto_paste_cb = gr.Checkbox(label="Auto paste upon fetch", value=True)
-        #     manual_image_selection_gb = gr.Checkbox(
-        #         label="Manual Image Selection", value=False
-        #     )
-
-        # auto_paste_cb.change(
-        #     lambda x: globals().update(auto_paste=x), auto_paste_cb, None
-        # )
+        # TODO: Implement a settings page
+        with gr.Tab("Settings", visible=False):
+            auto_paste_cb = gr.Checkbox(
+                label="Auto-paste clipboard", value=True
+            )
+            nsfw_img_cb = gr.Checkbox(
+                label="Allow NSFW Images", value=True
+            )
+            # nsfw_img_cb = gr.Checkbox(label="Allow NSFW Images", value=True)
+            save_settings_btn = gr.Button("Save settings")
 
         ##################
         # Event Handling #
@@ -157,6 +166,8 @@ def on_ui_tabs():
             [file_name_input, target_dir_drop, model_type_output],
             None,
         )
+
+        save_settings_btn.click(state.save_settings, [auto_paste_cb, nsfw_img_cb], None)
 
         # Component States Changes
         model_type_output.change(update_dropdown, model_type_output, target_dir_drop)
