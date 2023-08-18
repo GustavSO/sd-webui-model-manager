@@ -3,25 +3,20 @@ import modules.scripts as scripts
 import gradio as gr
 from pathlib import Path
 from tkinter import Tk
-from scripts.mm_libs import downloader, loader, model, state
-from modules import script_callbacks
+from scripts.mm_libs import downloader, loader, model
+from modules import script_callbacks, shared
+
 
 loader.get_dirs()
-state.load_settings()
 dir_list = []
 
-def reload_settings():
-    return [state.settings["auto_paste"], state.settings["allow_NSFW"]]
 
 def select_image(evt: gr.SelectData):
     downloader.current_model.image = evt.value
 
-
-
-
 def on_ui_tabs():
     def fetch(input):
-        if state.settings["auto_paste"]:
+        if shared.opts.mm_auto_paste:
             input = Tk().clipboard_get()
 
         (m_result, images) = downloader.fetch(input)
@@ -131,17 +126,6 @@ def on_ui_tabs():
                     )
                     download_btn = gr.Button("Download")
 
-        # TODO: Implement a settings page
-        with gr.Tab("Settings") as settings_tab:
-            gr.Markdown("""
-                        ### Settings values might not display correctly if you have used 'Defaults' to change default values from the main settings of the WebUI.
-                        ### As a temporary workaround, use the reload button to update the values.
-                        """)
-            auto_paste_cb = gr.Checkbox(label="Auto-paste clipboard", value=state.settings["auto_paste"])
-            nsfw_img_cb = gr.Checkbox(label="Allow NSFW Images", value=state.settings["allow_NSFW"])
-            save_settings_btn = gr.Button("Save settings")
-            reload_settings_btn = gr.Button("Reload settings")
-
         ##################
         # Event Handling #
         ##################
@@ -171,17 +155,23 @@ def on_ui_tabs():
         # Component States Changes
         model_type_output.change(update_dropdown, model_type_output, target_dir_drop)
         model_gallery_output.select(select_image, None, None)
-        # Settings
-        save_settings_btn.click(
-            state.change_settings,
-            [auto_paste_cb, nsfw_img_cb],
-            None,
-        )
-        reload_settings_btn.click(reload_settings, None, [auto_paste_cb, nsfw_img_cb])
 
     return [(ui_component, "Model Manager", "model_manager_tab")]
 
-
-
-
 script_callbacks.on_ui_tabs(on_ui_tabs)
+
+
+# TODO: Move settings here instead of doing it locally
+def on_ui_settings():
+    MM_SECTION =("mm", "Model Manager")
+
+    mm_options = {
+        "mm_auto_paste": shared.OptionInfo(True, "Enable Auto-paste"),
+        "mm_allow_NSFW": shared.OptionInfo(False, "Allow NSFW Images"),
+    }
+
+    for key, opt in mm_options.items():
+        opt.section = MM_SECTION
+        shared.opts.add_option(key, opt)
+
+script_callbacks.on_ui_settings(on_ui_settings)

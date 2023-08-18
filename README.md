@@ -42,7 +42,7 @@ I intend for this extension to be in a somewhat stable state when version 1.6.0 
 - Improvement to the fetch and download functionality
   - Display more information about a fetched model
   - Make it possible to select which version of the fetched model to display/download.
-- Add a "Settings" page:
+- Add various settings/options:
   - Allow/disallow NSFW images
   - Auto-paste clipboard
   - Provide filename suggestion based on a specific format (e.g. "filename [model version] (model creator)")

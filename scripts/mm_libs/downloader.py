@@ -6,7 +6,7 @@ from . import model
 from .debug import d_print
 from tqdm import tqdm
 import math
-from . import state
+from modules.shared import opts
 
 current_model = None
 
@@ -35,8 +35,7 @@ def fetch(model_url):
 
 
 def get_images(image_json):
-    print(state.settings["allow_NSFW"])
-    if state.settings["allow_NSFW"]:
+    if opts.mm_allow_NSFW:
         return [(i["url"], i["url"]) for i in image_json]
     else:
         return [(i["url"], i["url"]) for i in image_json if i["nsfw"] == "None"]
