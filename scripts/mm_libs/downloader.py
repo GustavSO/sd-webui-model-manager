@@ -6,6 +6,7 @@ from . import model
 from .debug import d_print
 from tqdm import tqdm
 import math
+from . import state
 
 current_model = None
 
@@ -34,7 +35,11 @@ def fetch(model_url):
 
 
 def get_images(image_json):
-    return [(i["url"], i["url"]) for i in image_json]
+    print(state.settings["allow_NSFW"])
+    if state.settings["allow_NSFW"]:
+        return [(i["url"], i["url"]) for i in image_json]
+    else:
+        return [(i["url"], i["url"]) for i in image_json if i["nsfw"] == "None"]
 
 
 def download(file_target):

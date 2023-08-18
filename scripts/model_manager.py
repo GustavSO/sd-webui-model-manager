@@ -4,30 +4,31 @@ import gradio as gr
 from pathlib import Path
 from tkinter import Tk
 from scripts.mm_libs import downloader, loader, model, state
-from scripts.mm_libs.state import settings
 from modules import script_callbacks
 
 loader.get_dirs()
-auto_paste = True
+state.load_settings()
 dir_list = []
 
-test = {"Huh": False}
-
+def reload_settings():
+    return [state.settings["auto_paste"], state.settings["allow_NSFW"]]
 
 def select_image(evt: gr.SelectData):
     downloader.current_model.image = evt.value
 
 
-def on_ui_tabs():
-    def fetch(url):
-        if auto_paste:
-            url = Tk().clipboard_get()
 
-        (m_result, images) = downloader.fetch(url)
-        if (m_result, images):
+
+def on_ui_tabs():
+    def fetch(input):
+        if state.settings["auto_paste"]:
+            input = Tk().clipboard_get()
+
+        (m_result, images) = downloader.fetch(input)
+        if (m_result, images) != (None, None):
             return {
                 model_box: gr.update(visible=True),
-                model_url_input: url,
+                model_url_input: input,
                 model_gallery_output: images,
                 model_name_output: m_result.name,
                 model_creator_output: m_result.creator,
@@ -41,7 +42,7 @@ def on_ui_tabs():
                 model_base_output: m_result.base_model,
             }
         return {
-            model_url_input: url,
+            model_url_input: input,
         }
 
     def download(filename, dropdown, type):
@@ -131,15 +132,15 @@ def on_ui_tabs():
                     download_btn = gr.Button("Download")
 
         # TODO: Implement a settings page
-        with gr.Tab("Settings", visible=False):
-            auto_paste_cb = gr.Checkbox(
-                label="Auto-paste clipboard", value=True
-            )
-            nsfw_img_cb = gr.Checkbox(
-                label="Allow NSFW Images", value=True
-            )
-            # nsfw_img_cb = gr.Checkbox(label="Allow NSFW Images", value=True)
+        with gr.Tab("Settings") as settings_tab:
+            gr.Markdown("""
+                        ### Settings values might not display correctly if you have used 'Defaults' to change default values from the main settings of the WebUI.
+                        ### As a temporary workaround, use the reload button to update the values.
+                        """)
+            auto_paste_cb = gr.Checkbox(label="Auto-paste clipboard", value=state.settings["auto_paste"])
+            nsfw_img_cb = gr.Checkbox(label="Allow NSFW Images", value=state.settings["allow_NSFW"])
             save_settings_btn = gr.Button("Save settings")
+            reload_settings_btn = gr.Button("Reload settings")
 
         ##################
         # Event Handling #
@@ -167,13 +168,20 @@ def on_ui_tabs():
             None,
         )
 
-        save_settings_btn.click(state.save_settings, [auto_paste_cb, nsfw_img_cb], None)
-
         # Component States Changes
         model_type_output.change(update_dropdown, model_type_output, target_dir_drop)
         model_gallery_output.select(select_image, None, None)
+        # Settings
+        save_settings_btn.click(
+            state.change_settings,
+            [auto_paste_cb, nsfw_img_cb],
+            None,
+        )
+        reload_settings_btn.click(reload_settings, None, [auto_paste_cb, nsfw_img_cb])
 
     return [(ui_component, "Model Manager", "model_manager_tab")]
+
+
 
 
 script_callbacks.on_ui_tabs(on_ui_tabs)
