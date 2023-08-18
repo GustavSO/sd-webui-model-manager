@@ -2,6 +2,9 @@
 
 A **very work in progress** extension for AUTOMATIC1111's SD WebUI, with the aim of streamlining the management, downloading, organizing, and editing of the various types of models (Checkpoints, LoRAs, TIs etc.)
 
+![Alt Text](scripts/resources/early%20preview.gif)
+
+
 # Important Notice
 
 Before installing this extension, please be aware of the following two things:
@@ -11,26 +14,29 @@ Before installing this extension, please be aware of the following two things:
 
 I intend for this extension to be released in a somewhat stable version, coinciding with the release of version 1.6.0 of A1111's WebUI. 
 
+
 ### Features
 
 - Fetching and downloading models from Civitai
-  - Types supported:
+  - Support for:
     - Checkpoints
     - LoRAs
     - Hypernetworks
     - Embeddings
     - LyCORIS
-  - Allows for editing of various information before downloading:
-    - Choose target directory
-    - Choose filename
-    - Choose preview image
-  - Support for the new LoRA metadata functionality in A1111
-    - When downloading a LoRA file, a .JSON file is saved in the same location. This contains various information, of note is activation words, allowing for easier use of downloaded LoRAs.
+    - **More to come**
+- Edit various properties before downloading:
+  - Target directory
+  - Filename
+  - Image
+  - **More to come**
+- Support the new built-in LoRA/LyCORIS metadata feature:
+  - When downloading a LoRA/LyCORIS model, a .JSON file is saved in the same location containing various information. Especially of note is activation words. These are added to the prompt automatically when selecting the LoRA/LyCORIS making them easier to immediately  after downloading.
 
 
 ### Known issues:
 
-- Some larger files (mostly checkpoints) sometimes doesn't download correctly.
+- In rare occasions, the connection stream to Civitai closes without raising errors. This results in some models being saved before all data has been writing to the file, leaving them unusable.
 
 ### Planned Features:
 
