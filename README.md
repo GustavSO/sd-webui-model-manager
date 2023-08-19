@@ -53,6 +53,7 @@ I intend for this extension to be in a somewhat stable state when version 1.6.0 
 - General improvements:
   - Issue an overwriting warning if a file already exists with the same name
   - Indexing downloaded models using SHA256 as to recognize already downloaded models
+  - Introduce some CSS styling
 
 ### Motivation & Goals
 

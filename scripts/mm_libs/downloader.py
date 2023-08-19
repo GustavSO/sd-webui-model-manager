@@ -5,7 +5,7 @@ import json
 from . import model
 from .debug import d_print
 from tqdm import tqdm
-import math
+from pathlib import Path
 from modules.shared import opts
 
 current_model = None
@@ -65,6 +65,9 @@ def download(file_target):
 
 def save_file(file: str, request: requests.Response):
     total = int(request.headers.get("content-length", 0))
+    if Path(file).exists():
+        d_print("File already exists, skipping")
+        return
     with open(file, "wb") as modelfile, tqdm(
         desc=file.split("\\")[-1],
         total=total,

@@ -27,6 +27,7 @@ def on_ui_tabs():
                 model_gallery_output: images,
                 model_name_output: m_result.name,
                 model_creator_output: m_result.creator,
+                model_size_output: m_result.size,
                 model_type_output: m_result.type,
                 file_name_input: f"{m_result.name} {m_result.version} ({m_result.creator})",
                 model_keywords_output: gr.update(
@@ -34,7 +35,7 @@ def on_ui_tabs():
                 )
                 if m_result.type in ("LORA", "LoCon")
                 else gr.update(visible=False),
-                model_base_output: m_result.base_model,
+                model_base_output: m_result.metadata["sd version"],
             }
         return {
             model_url_input: input,
@@ -90,13 +91,9 @@ def on_ui_tabs():
                         model_name_output = gr.Textbox(
                             label="Model Name", max_lines=1, interactive=False
                         )
-                        with gr.Row():
-                            model_creator_output = gr.Textbox(
-                                label="Model Creator", max_lines=1, interactive=False
-                            )
-                            creator_btn = gr.Button(
-                                "View", scale=0.25, visible=False
-                            )  # TODO: Implement
+                        model_creator_output = gr.Textbox(
+                            label="Model Creator", max_lines=1, interactive=False
+                        )
                         model_type_output = gr.Textbox(
                             label="Type", max_lines=1, interactive=False
                         )
@@ -105,9 +102,15 @@ def on_ui_tabs():
                             placeholder="No trigger words specified by creator",
                             interactive=True,
                         )
-                        model_base_output = gr.Textbox(
-                            label="Base Model", interactive=False, max_lines=1
-                        )
+                        model_size_output = gr.Textbox(label="Size", interactive=False, max_lines=1)
+                        with gr.Accordion(label="Details", open=False):
+                            model_downloads_output = gr.Textbox(label="Downloads", interactive=False, max_lines=1)
+                            model_uploaded_output = gr.Textbox(label="Uploaded", interactive=False, max_lines=1)
+                            model_base_output = gr.Textbox(label="Base Model", interactive=False, max_lines=1)
+                            model_traning_output = gr.Textbox(label="Training", interactive=False, max_lines=1)
+                            model_usage_tips_output = gr.Textbox(label="Usage Tips", interactive=False, max_lines=1)
+                            
+
 
                     model_gallery_output = gr.Gallery(
                         show_download_button=False, preview=True
@@ -140,6 +143,7 @@ def on_ui_tabs():
                 file_name_input,
                 model_type_output,
                 model_keywords_output,
+                model_size_output,
                 model_base_output,
                 model_gallery_output,
                 model_box,
@@ -161,7 +165,7 @@ def on_ui_tabs():
 script_callbacks.on_ui_tabs(on_ui_tabs)
 
 
-# TODO: Move settings here instead of doing it locally
+
 def on_ui_settings():
     MM_SECTION =("mm", "Model Manager")
 
