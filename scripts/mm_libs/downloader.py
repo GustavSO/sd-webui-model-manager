@@ -5,62 +5,60 @@ import json
 from . import model
 from .debug import d_print
 from tqdm import tqdm
-import math
-
-current_model = None
+from pathlib import Path
 
 civit_api = "https://civitai.com/api/v1/models/"
 civit_pattern = "(?<=^https:\/\/civitai.com\/models\/)[\d]+|^[\d]+$"
 
 def fetch(model_url):
-    global current_model
     url = re.search(civit_pattern, model_url)
 
     if not url:
         warning = "Invalid Input"
         gr.Warning(warning), d_print(warning)
-        return (None, None)
+        return
 
     r = requests.get(civit_api + url[0])
 
     if not r.ok:
         warning = "Couldn't contact CivitAI API, try again"
-        gr.Warning(warning), d_print(warning)
-        return (None, None)
+        gr.Warning(warning), d_print(warning), d_print(r.status_code)
+        return
 
     model_data = r.json()
-    current_model = model.Model(model_data)
-    return (current_model, get_images(model_data["modelVersions"][0]["images"]))
+    model_list = []
+    for model_version in model_data["modelVersions"]:
+        model_list = model_list + [model.Model(model_data, model_version)]
+        
+    return model_list
 
-
-def get_images(image_json):
-    return [(i["url"], i["url"]) for i in image_json]
-
-
-def download(file_target):
+def download_model(file_target, model: model.Model):
     d_print("Requesting download from CivitAI")
 
-    r_model = requests.get(current_model.download_url, stream=True)
+    r_model = requests.get(model.download_url, stream=True)
     # Retrive file format from the Content-Disposition header
     file_format = r_model.headers["Content-Disposition"].split(".")[-1].strip('"')
 
     if not r_model.ok:
         warning = "Couldn't contact CivitAI API, try again"
-        gr.Warning(warning), d_print(warning)
+        gr.Warning(warning), d_print(warning), d_print(r.status_code)
         return
 
-    r_img = requests.get(current_model.image, allow_redirects=True)
+    r_img = requests.get(model.selected_image, allow_redirects=True)
 
     save_file(f"{file_target}.{file_format}", r_model)
     save_file(f"{file_target}.jpeg", r_img)
    
-    if  current_model.type in ("LORA", "LoCon"):
-        dump_metadata(file_target, current_model.metadata)
+    if  model.type in ("LORA", "LoCon"):
+        dump_metadata(file_target, model.metadata)
     d_print("Download Complete")
     return
 
 def save_file(file: str, request: requests.Response):
     total = int(request.headers.get("content-length", 0))
+    if Path(file).exists():
+        d_print("File already exists, skipping")
+        return
     with open(file, "wb") as modelfile, tqdm(
         desc=file.split("\\")[-1],
         total=total,

@@ -1,22 +1,27 @@
 import math
 
+from modules.shared import opts
+
 class Model(object):
-    def __init__(self, data):
+    def __init__(self, data, model_version):
         self.name = data["name"]
         self.creator = data["creator"]["username"]
-        self.version = data["modelVersions"][0]["name"]
-        self.image = data["modelVersions"][0]["images"][0]["url"]
-        self.download_url = data["modelVersions"][0]["downloadUrl"]
+        self.version = model_version["name"]
+        self.images = get_images(model_version["images"])
+        self.selected_image = self.images[0][0] # This is so stupid, fix this with some js somehow or something
+        self.download_url = model_version["downloadUrl"]
         self.type = data["type"]
-        self.base_model = data["modelVersions"][0]["baseModel"] # Remove this an just refer to the same value stored in the metadata key
-        self.size = convert_size(data["modelVersions"][0]["files"][0]["sizeKB"])
+        self.size = convert_size(model_version["files"][0]["sizeKB"])
         self.metadata = {
             "description": "",
-            "sd version": data["modelVersions"][0]["baseModel"],
-            "activation text": get_trigger_words(data["modelVersions"][0]["trainedWords"]),
+            "sd version": model_version["baseModel"],
+            "activation text": get_trigger_words(model_version["trainedWords"]),
             "preferred weight": 0,
-            "notes": f"https://civitai.com/models/{data['id']}",
+            "notes": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}",
         }
+
+    def __str__(self):
+        return f"{self.name} {self.version} ({self.creator})"
 
 
 def get_trigger_words(words):
@@ -28,8 +33,15 @@ def get_trigger_words(words):
 def convert_size(size_bytes):
     if size_bytes == 0:
         return "0B"
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    size_name = ("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
     i = int(math.floor(math.log(size_bytes, 1024)))
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return "%s %s" % (s, size_name[i])
+
+
+def get_images(image_json):
+    if opts.mm_allow_NSFW:
+        return [(i["url"], i["url"]) for i in image_json]
+    else:
+        return [(i["url"], i["url"]) for i in image_json if i["nsfw"] == "None"]
