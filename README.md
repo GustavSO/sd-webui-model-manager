@@ -10,7 +10,7 @@ Before installing this extension, please be aware of the following two things:
 
 - This extension is being developed alongside version 1.6.0 of A1111's WebUI in which Gradio will see a version bump from 3.32.0 to 3.39.0. Some features made available in this version bump are used in this extension, however it still seems to work with version 1.5.1 of A1111's WebUI with some minor quirks and errors. \
 For this reason, it is <mark>highly recommended</mark> that you install this extension on a build from the 'dev' branch of A1111's WebUI or wait for the official release of 1.6.0
-- As mentioned, this extension is still very much WIP. While it is still in version 0.0.X please just consider it as "preview release". There will be bugs and errors.
+- As mentioned, this extension is still very much WIP. While it is still in version 0.0.X please just consider it a "preview release". There will be bugs and errors.
 
 I intend for this extension to be in a somewhat stable state when version 1.6.0 of the WebUI is released or shortly after
 
@@ -23,6 +23,7 @@ I intend for this extension to be in a somewhat stable state when version 1.6.0 
   - Embeddings
   - LyCORIS
   - ***More to come***
+- Select which version of a model to download
 - Edit various properties before downloading
   - Target directory
     - Supports custom model paths passed to COMMAND_ARGS
@@ -41,10 +42,11 @@ I intend for this extension to be in a somewhat stable state when version 1.6.0 
 
 - Improvement to the fetch and download functionality
   - Display more information about a fetched model
-  - Make it possible to select which version of the fetched model to display/download.
+  - ~~Make it possible to select which version of the fetched model to display/download.~~
 - Add various settings/options:
-  - Allow/disallow NSFW images
-  - Auto-paste clipboard
+  - ~~Create a "Model Manager" tab in "Settings"~~
+  - ~~Allow/disallow NSFW images~~
+  - ~~Auto-paste clipboard~~
   - Provide filename suggestion based on a specific format (e.g. "filename [model version] (model creator)")
   - Change depth of subdirectories to list (Currently only lists immediate subdirectories)
   - And more

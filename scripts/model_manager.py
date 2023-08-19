@@ -5,64 +5,81 @@ from pathlib import Path
 from tkinter import Tk
 from scripts.mm_libs import downloader, loader, model
 from modules import script_callbacks, shared
+from functools import reduce
 
 
 loader.get_dirs()
-dir_list = []
+
+# TODO: Fix this mess when the bug regarding Gradio dropdowns not retaining/updating indexes when updating choices is fixed
+selected_version_index = (
+    0  # Always shows the first version of the model so this is okay
+)
+selected_dir_index = 0
+
+fetched_models = []
 
 
-def select_image(evt: gr.SelectData):
-    downloader.current_model.image = evt.value
+def change_image(evt: gr.SelectData):
+    fetched_models[0].selected_image = evt.value
+
+def change_version(evt: gr.SelectData):
+    global selected_version_index
+    selected_version_index = evt.index
+    model = fetched_models[selected_version_index]
+    return [model.images, model.size, model.metadata["activation text"], model.metadata["sd version"], f"{model.name} [{model.version}] ({model.creator})"]
+
+def change_directory(evt: gr.SelectData):
+    global selected_dir_index
+    selected_dir_index = evt.index
+    return
+
 
 def on_ui_tabs():
+
     def fetch(input):
+        global fetched_models
         if shared.opts.mm_auto_paste:
             input = Tk().clipboard_get()
 
-        (m_result, images) = downloader.fetch(input)
-        if (m_result, images) != (None, None):
-            return {
-                model_box: gr.update(visible=True),
-                model_url_input: input,
-                model_gallery_output: images,
-                model_name_output: m_result.name,
-                model_creator_output: m_result.creator,
-                model_size_output: m_result.size,
-                model_type_output: m_result.type,
-                file_name_input: f"{m_result.name} {m_result.version} ({m_result.creator})",
-                model_keywords_output: gr.update(
-                    value=m_result.metadata["activation text"], visible=True
-                )
-                if m_result.type in ("LORA", "LoCon")
-                else gr.update(visible=False),
-                model_base_output: m_result.metadata["sd version"],
-            }
+        fetched_models = downloader.fetch(input)
+        if not fetched_models:
+            return {model_url_input: input}
         return {
+            model_box: gr.update(visible=True),
             model_url_input: input,
+            model_gallery_output: fetched_models[0].images,
+            model_name_output: fetched_models[0].name,
+            model_creator_output: fetched_models[0].creator,
+            model_size_output: fetched_models[0].size,
+            model_type_output: fetched_models[0].type,
+            file_name_input: f"{fetched_models[0].name} {fetched_models[0].version} ({fetched_models[0].creator})",
+            model_version_dropdown: gr.Dropdown().update(
+                value=fetched_models[0].version,
+                choices=reduce(lambda acc, xs: acc + [xs.version], fetched_models, []),
+            ),
+            model_keywords_output: gr.update(
+                value=fetched_models[0].metadata["activation text"], visible=True
+            )
+            if fetched_models[0].type in ("LORA", "LoCon")
+            else gr.update(visible=False),
+            model_base_output: fetched_models[0].metadata["sd version"],
         }
 
-    def download(filename, dropdown, type):
-        dest = loader.folders[type][dir_list.index(Path(dropdown))]
-        downloader.download(dest / filename)
-        return
+    def download(filename, type):
+        path = loader.folders[type][selected_dir_index]
+        model = fetched_models[selected_version_index]
+        downloader.download_model(path / filename, model)
 
-    # TODO: Fix this when possible
-    # Annoying bug currently:
-    # https://github.com/gradio-app/gradio/issues/1566
-    # Essnetially when a dropdown's choices is updated you can't get the currently selected items index
-    # This means that I'll have to create some sort of dublicate list and use the value to find the index. Annoying
-    # Should be fixed in 4.0 version
-    def update_dropdown(m_type):
-        global dir_list
-        subdirs = []
-        for item in loader.folders[m_type]:
-            subdirs.append(
-                item.relative_to(
-                    *item.parts[: len(loader.folders[m_type][0].parts) - 1]
-                )
-            )
-        dir_list = subdirs.copy()
-        return target_dir_drop.update(value=subdirs[0], choices=subdirs)
+    # Updates the directory dropdown to show the subdirectories of the selected model type.
+    # Performs a reduction on the string paths of the subdirectories to make them more readable.
+    def update_directory_dropdown(model_type):
+        subdirs = reduce(
+            lambda acc, xs: acc
+            + [xs.relative_to(*xs.parts[: len(loader.folders[model_type][0].parts) - 1])],
+            loader.folders[model_type],
+            [],
+        )
+        return directory_dropdown.update(value=subdirs[0], choices=subdirs)
 
     ##################
     # User Interface #
@@ -88,9 +105,13 @@ def on_ui_tabs():
                 gr.Markdown("## Model Information")
                 with gr.Row():
                     with gr.Column():
-                        model_name_output = gr.Textbox(
-                            label="Model Name", max_lines=1, interactive=False
-                        )
+                        with gr.Row():
+                            model_name_output = gr.Textbox(
+                                label="Model Name", max_lines=1, interactive=False
+                            )
+                            model_version_dropdown = gr.Dropdown(
+                                label="Version", choices=["Help", "Me"], scale=0.3
+                            )
                         model_creator_output = gr.Textbox(
                             label="Model Creator", max_lines=1, interactive=False
                         )
@@ -102,18 +123,28 @@ def on_ui_tabs():
                             placeholder="No trigger words specified by creator",
                             interactive=True,
                         )
-                        model_size_output = gr.Textbox(label="Size", interactive=False, max_lines=1)
+                        model_size_output = gr.Textbox(
+                            label="Size", interactive=False, max_lines=1
+                        )
                         with gr.Accordion(label="Details", open=False):
-                            model_downloads_output = gr.Textbox(label="Downloads", interactive=False, max_lines=1)
-                            model_uploaded_output = gr.Textbox(label="Uploaded", interactive=False, max_lines=1)
-                            model_base_output = gr.Textbox(label="Base Model", interactive=False, max_lines=1)
-                            model_traning_output = gr.Textbox(label="Training", interactive=False, max_lines=1)
-                            model_usage_tips_output = gr.Textbox(label="Usage Tips", interactive=False, max_lines=1)
-                            
-
+                            model_downloads_output = gr.Textbox(
+                                label="Downloads", interactive=False, max_lines=1
+                            )
+                            model_uploaded_output = gr.Textbox(
+                                label="Uploaded", interactive=False, max_lines=1
+                            )
+                            model_base_output = gr.Textbox(
+                                label="Base Model", interactive=False, max_lines=1
+                            )
+                            model_traning_output = gr.Textbox(
+                                label="Training", interactive=False, max_lines=1
+                            )
+                            model_usage_tips_output = gr.Textbox(
+                                label="Usage Tips", interactive=False, max_lines=1
+                            )
 
                     model_gallery_output = gr.Gallery(
-                        show_download_button=False, preview=True
+                        show_download_button=False, preview=True, elem_id="_gallery"
                     )
                 with gr.Row(equal_height=True):
                     file_name_input = gr.Textbox(
@@ -122,7 +153,7 @@ def on_ui_tabs():
                         interactive=True,
                         max_lines=1,
                     )
-                    target_dir_drop = gr.Dropdown(
+                    directory_dropdown = gr.Dropdown(
                         label="Directory",
                         info="Select the target directory for the file(s).",
                         interactive=True,
@@ -132,6 +163,7 @@ def on_ui_tabs():
         ##################
         # Event Handling #
         ##################
+
         # Buttons
         fetch_btn.click(
             fetch,
@@ -147,27 +179,50 @@ def on_ui_tabs():
                 model_base_output,
                 model_gallery_output,
                 model_box,
+                model_version_dropdown,
+                directory_dropdown,
             ],
         )
 
         download_btn.click(
             download,
-            [file_name_input, target_dir_drop, model_type_output],
+            [file_name_input, model_type_output],
             None,
         )
 
-        # Component States Changes
-        model_type_output.change(update_dropdown, model_type_output, target_dir_drop)
-        model_gallery_output.select(select_image, None, None)
+        # Component States Changes #
+
+        ## General
+        model_type_output.change(update_directory_dropdown, model_type_output, directory_dropdown)
+
+        ## Gallery
+        model_gallery_output.select(change_image, None, None)
+
+        ## Dropdowns
+        directory_dropdown.select(change_directory, None, None)
+        model_version_dropdown.select(
+            change_version,
+            None,
+            [
+                model_gallery_output,
+                model_size_output,
+                model_keywords_output,
+                model_base_output,
+                file_name_input
+            ],
+        )
 
     return [(ui_component, "Model Manager", "model_manager_tab")]
+
 
 script_callbacks.on_ui_tabs(on_ui_tabs)
 
 
-
+#################
+# Settings Menu #
+#################
 def on_ui_settings():
-    MM_SECTION =("mm", "Model Manager")
+    MM_SECTION = ("mm", "Model Manager")
 
     mm_options = {
         "mm_auto_paste": shared.OptionInfo(True, "Enable Auto-paste"),
@@ -177,5 +232,6 @@ def on_ui_settings():
     for key, opt in mm_options.items():
         opt.section = MM_SECTION
         shared.opts.add_option(key, opt)
+
 
 script_callbacks.on_ui_settings(on_ui_settings)
