@@ -36,7 +36,7 @@ def on_ui_settings():
     mm_options = {
         "mm_auto_paste": shared.OptionInfo(True, "Enable Auto-paste"),
         "mm_allow_NSFW": shared.OptionInfo(True, "Allow NSFW Images"),
-        "mm_github_token": shared.OptionInfo('', 'The GitHub Token used to create a Selenium session'),
+        "mm_github_token": shared.OptionInfo("", 'The GitHub Token used to create a Selenium session'),
     }
 
     for key, opt in mm_options.items():
