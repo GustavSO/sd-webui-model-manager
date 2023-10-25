@@ -2,7 +2,7 @@ import re
 import requests
 import gradio as gr
 import json
-from . import model
+from .model import Model
 from .debug import d_print
 from tqdm import tqdm
 from pathlib import Path
@@ -10,7 +10,7 @@ from pathlib import Path
 civit_api = "https://civitai.com/api/v1/models/"
 civit_pattern = "(?<=^https:\/\/civitai.com\/models\/)[\d]+|^[\d]+$"
 
-def fetch(model_url):
+def fetch(model_url) -> list[Model]:
     url = re.search(civit_pattern, model_url)
 
     if not url:
@@ -28,11 +28,11 @@ def fetch(model_url):
     model_data = r.json()
     model_list = []
     for model_version in model_data["modelVersions"]:
-        model_list = model_list + [model.Model(model_data, model_version)]
+        model_list = model_list + [Model(model_data, model_version)]
         
     return model_list
 
-def download_model(file_target, model: model.Model):
+def download_model(file_target, model: Model, image):
     d_print("Requesting download from CivitAI")
 
     r_model = requests.get(model.download_url, stream=True)
@@ -41,10 +41,10 @@ def download_model(file_target, model: model.Model):
 
     if not r_model.ok:
         warning = "Couldn't contact CivitAI API, try again"
-        gr.Warning(warning), d_print(warning), d_print(r.status_code)
+        gr.Warning(warning), d_print(warning), d_print(r_model.status_code)
         return
 
-    r_img = requests.get(model.selected_image, allow_redirects=True)
+    r_img = requests.get(image, allow_redirects=True)
 
     save_file(f"{file_target}.{file_format}", r_model)
     save_file(f"{file_target}.jpeg", r_img)
