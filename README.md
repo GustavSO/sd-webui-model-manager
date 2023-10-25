@@ -1,28 +1,24 @@
 # Model Manager
 
-A **very work in progress** extension for [AUTOMATIC1111's WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui), with the aim of streamlining the management, downloading, organizing, and editing of the various types of models (Checkpoints, LoRAs, TIs etc.)
+A **work in progress** extension for [AUTOMATIC1111's WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui), with the aim of streamlining the management, downloading, organizing, and editing of the various types of models (Checkpoints, LoRAs, LyCORIS, TIs etc.)
 
 ![Alt Text](resources/early%20preview.gif)
 
 # Important Notice
 
-Before installing this extension, please be aware of the following two things:
+Before installing this extension, please be aware of the following:
 
-- This extension is being developed alongside version 1.6.0 of A1111's WebUI in which Gradio will see a version bump from 3.32.0 to 3.39.0. Some features made available in this version bump are used in this extension, however it still seems to work with version 1.5.1 of A1111's WebUI with some minor quirks and errors. \
-For this reason, it is <mark>highly recommended</mark> that you install this extension on a build from the 'dev' branch of A1111's WebUI or wait for the official release of 1.6.0
-- As mentioned, this extension is still very much WIP. While it is still in version 0.0.X please just consider it a "preview release". There will be bugs and errors.
-
-I intend for this extension to be in a somewhat stable state when version 1.6.0 of the WebUI is released or shortly after
+- This extension is still very much work-in-progress. Currently, it handles the downloading of models rather well. Other features like re-naming, deletion and moving of already installed features will come at a later date.
+- Use A1111 1.6.0 or later
 
 ## Current Features
 
 - Fetch and download various models types from [Civitai](https://civitai.com/)
   - Checkpoints
   - LoRAs
+  - LyCORIS
   - Hypernetworks
   - Embeddings
-  - LyCORIS
-  - ***More to come***
 - Select which version of a model to download
 - Edit various properties before downloading
   - Target directory
@@ -32,28 +28,33 @@ I intend for this extension to be in a somewhat stable state when version 1.6.0 
   - ***More to come***
 - Support the new built-in LoRA/LyCORIS metadata feature
   - When downloading a LoRA/LyCORIS model, a .JSON file is saved in the same location containing various information. Especially of note is activation words. These are added to the prompt automatically when selecting the LoRA/LyCORIS making them easier to immediately after downloading.
+- Settings
+  - Allow/disallow NSFW images
+  - Auto-paste clipboard when fetching a model
+  - ***More to come***
 
+### Advanced/WIP features:
+
+#### Scrape models from your Civitai Notifications
+
+While this feature does work it requires some technical know-how and a GitHub account as it needs a Fine-Grained Token.
 
 ### Known Issues:
 
 - In rare occasions, the connection stream to Civitai closes without raising errors. This results in some models being saved before all data has been written to the file, leaving them unusable.
+- Trying to fetch a model that only has preview images that are tagged NSFW while the option to show NSFW images is off, will cause an error as it can't find a suitable image for showing the model
 
 ### Planned Features/Improvements:
 
 - Improvement to the fetch and download functionality
   - Display more information about a fetched model
-  - ~~Make it possible to select which version of the fetched model to display/download.~~
 - Add various settings/options:
-  - ~~Create a "Model Manager" tab in "Settings"~~
-  - ~~Allow/disallow NSFW images~~
-  - ~~Auto-paste clipboard~~
   - Provide filename suggestion based on a specific format (e.g. "filename [model version] (model creator)")
   - Change depth of subdirectories to list (Currently only lists immediate subdirectories)
-  - And more
 - Add a "Manage/Organizer" page:
   - Provide various ways to edit, organize and search in already installed models.
 - General improvements:
-  - Issue an overwriting warning if a file already exists with the same name
+  - Issue an overwriting warning if a file already exists with the same name. Currently it will not allow you to save a model with the same name as an existing one
   - Indexing downloaded models using SHA256 as to recognize already downloaded models
   - Introduce some CSS styling
 
