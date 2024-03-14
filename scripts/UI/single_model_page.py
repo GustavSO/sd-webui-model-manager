@@ -34,4 +34,4 @@ def UI():
 
     fetch_btn.click(
         fetch, model_url_input, model_card.get_components() + [model_url_input]
-    ).then(lambda: model_card.selected_model.images, None, model_card.model_gallery)
+    ).then(model_card.update_gallery, None, model_card.model_gallery)

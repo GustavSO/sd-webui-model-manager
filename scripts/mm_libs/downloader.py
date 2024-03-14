@@ -14,13 +14,13 @@ civit_pattern = "(?<=^https:\/\/civitai.com\/models\/)[\d]+|^[\d]+$"
 def fetch(model_url) -> list[Model]:
     # Check if API key is present
     if not opts.mm_supress_API_warnings and not opts.mm_civitai_api_key:
-        warning = "No API key set. Some models may require authentication to download, please add your API key to the settings. This warning can be supressed in the settings"
-        gr.Warning(warning), d_print(warning)
+        info = "No API key set. Some models may require authentication to download, please add your API key to the settings. This warning can be supressed in the settings"
+        gr.Info(info), d_print(info)
 
     url = re.search(civit_pattern, model_url)
 
     if not url:
-        warning = "Invalid Input"
+        warning = "Invalid URL, please enter a valid CivitAI model URL or ID. Example: https://civitai.com/models/1234 or 1234"
         gr.Warning(warning), d_print(warning)
         return
 

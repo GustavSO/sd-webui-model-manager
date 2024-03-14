@@ -64,7 +64,7 @@ class Card:
         self.model_version_dropdown.select(
             self.change_model, None, self.get_components()
         ).then(
-            lambda: self.selected_model.images, None, self.model_gallery
+            self.update_gallery, None, self.model_gallery
         )
         self.model_gallery.select(self.change_image, None, None)
 
@@ -78,7 +78,7 @@ class Card:
             self.model_keywords_text,
             self.model_size_text,
             self.model_base_text,
-            # self.model_gallery,
+            # self.model_gallery, #Images are loaded after other info
             self.filename_input,
             self.dirdd.get_components(),
         ]
@@ -96,7 +96,7 @@ class Card:
             self.selected_model.metadata["activation text"],
             self.selected_model.size,
             self.selected_model.metadata["sd version"],
-            # self.selected_model.images,
+            # self.selected_model.images, #Images are loaded after other info
             f"{self.selected_model.name} {self.selected_model.version} ({self.selected_model.creator})",
             self.dirdd.get_updates(),
         ]
@@ -114,6 +114,11 @@ class Card:
     def change_image(self, evt: gr.SelectData):
         self.selected_image_index = evt.index
         self.selected_image = evt.value
+
+    def update_gallery(self):
+        if not self.selected_model:
+            return self.model_gallery.value
+        return self.selected_model.images
 
     # Should also update image to the one in the UI
     def change_model(self, evt: gr.SelectData):
