@@ -12,9 +12,10 @@ from modules import shared
 models: list[list[Model]] = []
 cards: list[C2] = []
 last_model_index = 0
-is_token_set = shared.opts.mm_github_token != ""
+is_token_set = False
 
 def UI():
+    is_token_set = shared.opts.mm_github_token != ""
 
     def create_session():
         try:
