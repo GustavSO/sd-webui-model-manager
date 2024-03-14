@@ -1,6 +1,10 @@
 import math
+from sys import version
 
 from modules.shared import opts
+
+# TODO: Add a "recommended strength" field to the metadata
+# Could also expand with additional data like EPOCHS, Reviews, etc.
 
 class Model(object):
     def __init__(self, data, model_version):
@@ -15,7 +19,7 @@ class Model(object):
         self.metadata = {
             "description": "",
             "sd version": model_version["baseModel"],
-            "activation text": get_trigger_words(model_version["trainedWords"]),
+            "activation text": get_trigger_words(model_version["trainedWords"]) if "trainedWords" in model_version else "",
             "preferred weight": 0,
             "notes": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}",
         }
@@ -26,7 +30,8 @@ class Model(object):
 
 def get_trigger_words(words):
     if words:
-        return ", ".join(words) + "," # TODO: Ending commas are a personal preference. Create a toggle in settings (low priority)
+        cleaned_words = [word.rstrip(' ,') for word in words]
+        return ", ".join(cleaned_words) + ", "
     else:
         return "" 
 
