@@ -2,11 +2,8 @@ import modules.scripts as scripts
 from modules import script_callbacks, shared
 
 import gradio as gr
-from pathlib import Path
-from tkinter import Tk
-from scripts.mm_libs import downloader, loader, model
-from scripts.UI import single_model_page, notification_fetcher_page
-from functools import reduce
+from scripts.mm_libs import loader
+from scripts.UI import single_model_page, notification_fetcher_page, utilities
 
 
 def on_ui_tabs():
@@ -21,6 +18,9 @@ def on_ui_tabs():
                 single_model_page.UI()
             with gr.Tab("Fetch from Civitai notifications"):
                 notification_fetcher_page.UI()
+        # with gr.Tab("Utilities"):
+        #     utilities.UI()
+
 
     loader.sort_dirs()
     return [(ui_component, "Model Manager", "model_manager_tab")]

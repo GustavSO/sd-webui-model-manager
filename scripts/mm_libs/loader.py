@@ -36,7 +36,6 @@ def sort_dirs():
         if not isinstance(model_dir, Path):
             model_dir = Path(model_dir)
         folders[model_type] = [model_dir] + get_subdirs(model_dir, opts.mm_folder_depth)
-        print(f"Model Type: {model_type}, Model Dir: {model_dir}, Subdirs: {folders[model_type]}")
     search_depth = opts.mm_folder_depth
 
 

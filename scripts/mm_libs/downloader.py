@@ -12,7 +12,6 @@ civit_api = "https://civitai.com/api/v1/models/"
 civit_pattern = "(?<=^https:\/\/civitai.com\/models\/)[\d]+|^[\d]+$"
 
 def fetch(model_url) -> list[Model]:
-
     # Check if API key is present
     if not opts.mm_supress_API_warnings and not opts.mm_civitai_api_key:
         warning = "No API key set. Some models may require authentication to download, please add your API key to the settings. This warning can be supressed in the settings"
@@ -32,11 +31,17 @@ def fetch(model_url) -> list[Model]:
         gr.Warning(warning), d_print(warning), d_print(r.status_code)
         return
 
-    model_data = r.json()
+    try:
+        model_data = r.json()
+    except json.JSONDecodeError:
+        error = "Couldn't decode CivitAI API response, try again. Servers might be down"
+        gr.Warning(error), d_print(error)
+        return
+
     model_list = []
     for model_version in model_data["modelVersions"]:
         model_list = model_list + [Model(model_data, model_version)]
-        
+
     return model_list
 
 def download_model(file_target, model: Model, image):
