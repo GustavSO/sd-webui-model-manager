@@ -6,11 +6,18 @@ from .model import Model
 from .debug import d_print
 from tqdm import tqdm
 from pathlib import Path
+from modules.shared import opts
 
 civit_api = "https://civitai.com/api/v1/models/"
 civit_pattern = "(?<=^https:\/\/civitai.com\/models\/)[\d]+|^[\d]+$"
 
 def fetch(model_url) -> list[Model]:
+
+    # Check if API key is present
+    if not opts.mm_supress_API_warnings and not opts.mm_civitai_api_key:
+        warning = "No API key set. Some models may require authentication to download, please add your API key to the settings. This warning can be supressed in the settings"
+        gr.Warning(warning), d_print(warning)
+
     url = re.search(civit_pattern, model_url)
 
     if not url:
@@ -34,8 +41,17 @@ def fetch(model_url) -> list[Model]:
 
 def download_model(file_target, model: Model, image):
     d_print("Requesting download from CivitAI")
+    
+    # Read more about their API Key authentication here: https://education.civitai.com/civitais-guide-to-downloading-via-api/
+    r_model = requests.get(model.download_url, headers={"Authorization": f"Bearer {opts.mm_civitai_api_key}"}, stream=True)
 
-    r_model = requests.get(model.download_url, stream=True)
+    d_print(f"Response Status Code: {r_model.status_code}")
+
+    if r_model.status_code == 401:
+        error = "Required authentication failed, please add your Civitai API key in the settings or ensure it is correct"
+        gr.Warning(error), d_print(error) # TODO: Should be a error/exception instead of warning
+        return
+    
     # Retrive file format from the Content-Disposition header
     file_format = r_model.headers["Content-Disposition"].split(".")[-1].strip('"')
 
