@@ -5,9 +5,7 @@ from scripts.mm_libs import downloader, loader
 from modules import shared
 from .card2 import Card
 
-
-loader.get_dirs()
-
+loader.sort_dirs()
 
 def UI():
     def fetch(input):
