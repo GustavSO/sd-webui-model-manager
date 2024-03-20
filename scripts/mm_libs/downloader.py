@@ -54,7 +54,7 @@ def download_model(file_target, model: Model, image):
 
     if r_model.status_code == 401:
         error = "Required authentication failed, please add your Civitai API key in the settings or ensure it is correct"
-        gr.Warning(error), d_print(error) # TODO: Should be a error/exception instead of warning
+        gr.Warning(error)
         return
     
     # Retrive file format from the Content-Disposition header
@@ -72,7 +72,7 @@ def download_model(file_target, model: Model, image):
    
     if  model.type in ("LORA", "LoCon"):
         dump_metadata(file_target, model.metadata)
-    d_print("Download Complete")
+    gr.Info("Download Complete"), d_print("Download Complete")
     return
 
 def save_file(file: str, request: requests.Response):
