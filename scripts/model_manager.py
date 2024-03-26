@@ -40,6 +40,7 @@ def on_ui_settings():
         "mm_supress_API_warnings": OptionInfo(False, "Supress API key warning").info("Only applies when fetching. Will still show errors on download if it fails due to authentication issues"),
         "mm_folder_depth": OptionInfo(1, "Subdirectory Depth", gr.Slider, {"minimum": 0, "maximum": 10, "step": 1}).info("This is the depth of subdirectories to search for when downloading models. Default is 1, which means it will only search the immediate subdirectories of the root folder for the model type"),
         "mm_auto_naming_formatting": OptionInfo("model_name model_version [model_base] (model_creator)", "Naming Format").js("Info", "settingsHints").info("The formatting of the auto naming suggestion. Need to adhere to filenaming restriction of the OS, eg. no / or \ in Windows. If left empty it will default to the name of the model as it is displayed on the model page"),
+        "mm_auto_trim_whitespace": OptionInfo(True, "Trim Whitespace").info("Will remove leading, trailing and double whitespace from the filename when downloading a model"),
         "mm_github_token": OptionInfo("", "GitHub Token").info("GitHub Token used to create a Selenium session, for fetching civitai notifications. Feature still in development!")
     }))
 

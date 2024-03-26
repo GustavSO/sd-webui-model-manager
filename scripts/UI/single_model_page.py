@@ -2,7 +2,7 @@ from tkinter import Tk
 import gradio as gr
 from scripts.mm_libs import downloader, loader
 from modules import shared
-from .card2 import Card
+from .card import Card
 
 loader.sort_dirs()
 
