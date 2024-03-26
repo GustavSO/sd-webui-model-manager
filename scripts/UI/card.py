@@ -36,15 +36,15 @@ def adjust_filename(filename : str):
     if opts.mm_auto_trim_illegal_chars:
         filename = IILEGAL_WIN_CHARS.sub('', filename)
 
-    if opts.mm_auto_trim_whitespace:
-        filename = re.sub(" +", " ", filename)
+    alphabets = opts.mm_filter_alphabet
+    for alphabet in alphabets:
+        filename = re.sub(alphabet_mapping[alphabet], "", filename)
 
     if opts.mm_auto_fit_brackets:
         filename = re.sub(r"([\[(\{])\s*([^)\]}]+?)\s*([\])}])", lambda x: f"{x.group(1)}{x.group(2).strip()}{x.group(3)}", filename)
 
-    alphabets = opts.mm_filter_alphabet
-    for alphabet in alphabets:
-        filename = re.sub(alphabet_mapping[alphabet], "", filename)
+    if opts.mm_auto_trim_whitespace:
+        filename = re.sub(" +", " ", filename)
 
     return filename.strip()
 
@@ -142,6 +142,9 @@ class Card:
             name = opts.mm_auto_naming_formatting
             for key, value in self.mapping.items():
                 name = name.replace(key, str(eval(value)))
+
+        if opts.mm_format_on_fetch:
+            name = adjust_filename(name)
 
         return [
             gr.update(visible=self.visibility),

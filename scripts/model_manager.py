@@ -44,6 +44,7 @@ def on_ui_settings():
         "mm_auto_trim_illegal_chars": OptionInfo(True, "Trim Illegal Characters").info("Automatically remove any illegal characters from the filename when downloading a model"),
         "mm_auto_fit_brackets": OptionInfo(True, "Fit Brackets").info("Automatically removes whitespace around brackets in the filename when downloading a model. Eg. ( My Model ) -> (My Model), supports [], {} and ()"),
         "mm_filter_alphabet": OptionInfo([], "Filter Alphabets", ui_components.DropdownMulti, lambda: {"choices": list(["Chinese", "Japanese", "Latin", "Cyrillic"])}).info("Automatically remove characters from the selected alphabets from the filename when downloading a model"),
+        "mm_format_on_fetch": OptionInfo(True, "Format on Fetch").info("Automatically format the filename when fetching a model in adherence to the formatting settings. If disabled, the filename will be formatted when downloading the model instead"),
         "mm_github_token": OptionInfo("", "GitHub Token").info("GitHub Token used to create a Selenium session, for fetching civitai notifications. Feature still in development!")
     }))
 
