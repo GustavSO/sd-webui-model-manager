@@ -43,6 +43,9 @@ def adjust_filename(filename : str):
     if opts.mm_auto_fit_brackets:
         filename = re.sub(r"([\[(\{])\s*([^)\]}]+?)\s*([\])}])", lambda x: f"{x.group(1)}{x.group(2).strip()}{x.group(3)}", filename)
 
+    if opts.mm_remove_empty_brackets:
+        filename = re.sub(r"[\[(\{]\s*[\])}]", "", filename)
+
     if opts.mm_auto_trim_whitespace:
         filename = re.sub(" +", " ", filename)
 
