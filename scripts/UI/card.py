@@ -1,5 +1,6 @@
 from functools import reduce
 from math import e
+import os
 import re
 import gradio as gr
 from scripts.mm_libs.debug import d_print
@@ -9,6 +10,36 @@ from .directory_dropdown import Directory_DropDown as dir_dd
 
 from modules.shared import opts
 
+# TODO: Should detect on a per-OS basis
+IILEGAL_WIN_CHARS = re.compile(r'[<>:"/|?*\\]')
+
+def vaidate_filename(filename : str):
+    if IILEGAL_WIN_CHARS.search(filename):
+        gr.Warning("Invalid Filename: Illegal characters detected. Remove them or enable 'Trim Illegal Characters' in settings")
+        return
+
+    if filename == "":
+        gr.Warning("Invalid Filename: Filename cannot be empty")
+        return
+
+    return filename
+
+
+def adjust_filename(filename : str):
+    if opts.mm_auto_trim_illegal_chars:
+        filename = IILEGAL_WIN_CHARS.sub('', filename)
+
+
+    if opts.mm_auto_trim_whitespace:
+        filename = re.sub(" +", " ", filename)
+
+    if opts.mm_auto_fit_brackets:
+        filename = re.sub(r"([\[(\{])\s*([^)\]}]+?)\s*([\])}])", lambda x: f"{x.group(1)}{x.group(2).strip()}{x.group(3)}", filename)
+
+     # Removes leading and trailing whitespace as the OS would do it automatically when saving a file
+    filename = filename.strip()
+
+    return filename
 
 class Card:
     mapping = {
@@ -71,7 +102,8 @@ class Card:
                 self.dirdd = dir_dd()
                 download_btn = gr.Button("Download")
 
-        download_btn.click(self.download, self.filename_input, None)
+
+        download_btn.click(adjust_filename, self.filename_input, self.filename_input).then(self.download, self.filename_input, None)
         
         self.model_version_dropdown.select(
             self.change_model, None, self.get_components()
@@ -150,9 +182,11 @@ class Card:
         return self.get_updates()
 
     def download(self, filename):
-        if opts.mm_auto_trim_whitespace: 
-            filename = re.sub(' +', ' ', filename).strip()
+        filename = vaidate_filename(filename)
 
+        if not filename:
+            return
+        
         downloader.download_model(
             self.dirdd.selected_dir / filename, self.selected_model, self.selected_image
         )
