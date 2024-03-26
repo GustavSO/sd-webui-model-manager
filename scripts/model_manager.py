@@ -48,6 +48,7 @@ def on_ui_settings():
         "mm_decimalize_versioning": OptionInfo(True, "Decimalize Versioning").info("Convert the version number to decimal format in the filename when downloading a model. Eg. V1 -> V1.0"),
         "mm_remove_empty_brackets": OptionInfo(True, "Remove Empty Brackets").info("Automatically remove empty brackets from the filename when downloading a model"),
         "mm_filter_alphabet": OptionInfo([], "Filter Alphabets", ui_components.DropdownMulti, lambda: {"choices": list(["Chinese", "Japanese", "Latin", "Cyrillic"])}).info("Automatically remove characters from the selected alphabets from the filename when downloading a model"),
+        "mm_excluded_words_or_phrases": OptionInfo("", "Excluded Words or Phrases").info("Words or phrases to exclude from the filename. Only done once when fetching and only effects model_name or model_version. Useful for removing redundant words like lora, embedding etc. Separate words with a comma (,). Eg. 'lora, embedding, model'. Case insensitive"),
         "mm_format_on_fetch": OptionInfo(True, "Format on Fetch").info("Automatically format the filename when fetching a model in adherence to the formatting settings. If disabled, the filename will be formatted when downloading the model instead"),
         "mm_github_token": OptionInfo("", "GitHub Token").info("GitHub Token used to create a Selenium session, for fetching civitai notifications. Feature still in development!")
     }))

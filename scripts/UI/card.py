@@ -20,6 +20,14 @@ alphabet_mapping = {
     "Latin": r"[a-zA-Z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]" # Latin Letters, Latin-1 Supplement (excluding × [U+00D7] and ÷ [U+00F7])
 }
 
+name_mapping = {
+    "model_name": "self.selected_model.name",
+    "model_version": "self.selected_model.version",
+    "model_base": "self.selected_model.metadata['sd version']",
+    "model_creator": "self.selected_model.creator",
+    "model_type": "self.selected_model.type",
+}
+
 def vaidate_filename(filename : str):
     if IILEGAL_WIN_CHARS.search(filename):
         gr.Warning("Invalid Filename: Illegal characters detected. Remove them or enable 'Trim Illegal Characters' in settings")
@@ -54,21 +62,15 @@ def adjust_filename(filename : str):
     
     if opts.mm_decimalize_versioning:
         filename = re.sub(r"V(\d+)(?!\.\d+)", lambda x: f"V{x.group(1)}.0", filename)
-        
+
     if opts.mm_auto_trim_whitespace:
         filename = re.sub(" +", " ", filename)
 
     return filename.strip()
 
-class Card:
-    mapping = {
-        "model_name": "self.selected_model.name",
-        "model_version": "self.selected_model.version",
-        "model_base": "self.selected_model.metadata['sd version']",
-        "model_creator": "self.selected_model.creator",
-        "model_type": "self.selected_model.type",
-    }
 
+
+class Card:
     def __init__(
         self, title="huh", creator="defcreator", type="deftype", visibility=True
     ) -> None:
@@ -146,14 +148,27 @@ class Card:
             self.dirdd.get_components(),
         ]
 
+    def process_name(self, name, excluded_words):
+        for word in excluded_words:
+            name = re.sub(word.strip(), '', name, flags=re.IGNORECASE)
+        return name
+
+    def get_name_from_formatting(self, name_format, excluded_words):
+        for key, value in name_mapping.items():
+            eval_value = str(eval(value))
+            if key in ['model_name', 'model_version']:
+                eval_value = self.process_name(eval_value, excluded_words)
+            name_format = name_format.replace(key, eval_value)
+        return name_format
+
     def get_updates(self):
-        # Name creation
+        excluded_words = opts.mm_excluded_words_or_phrases.split(",") if opts.mm_excluded_words_or_phrases else []
         if opts.mm_auto_naming_formatting == "":
             name = f"{self.selected_model.name}"
+            if excluded_words:
+                name = self.process_name(name, excluded_words)
         else:
-            name = opts.mm_auto_naming_formatting
-            for key, value in self.mapping.items():
-                name = name.replace(key, str(eval(value)))
+            name = self.get_name_from_formatting(opts.mm_auto_naming_formatting, excluded_words)
 
         if opts.mm_format_on_fetch:
             name = adjust_filename(name)
