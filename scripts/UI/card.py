@@ -46,6 +46,15 @@ def adjust_filename(filename : str):
     if opts.mm_remove_empty_brackets:
         filename = re.sub(r"[\[(\{]\s*[\])}]", "", filename)
 
+    if opts.mm_capatalize:
+        filename = re.sub(r"\b\w", lambda x: x.group().upper(), filename)
+
+    if opts.mm_capatalize_versioning:
+        filename = re.sub(r"v(\d+)", lambda x: f"V{x.group(1)}", filename)
+    
+    if opts.mm_decimalize_versioning:
+        filename = re.sub(r"V(\d+)(?!\.\d+)", lambda x: f"V{x.group(1)}.0", filename)
+        
     if opts.mm_auto_trim_whitespace:
         filename = re.sub(" +", " ", filename)
 
