@@ -13,6 +13,13 @@ from modules.shared import opts
 # TODO: Should detect on a per-OS basis
 IILEGAL_WIN_CHARS = re.compile(r'[<>:"/|?*\\]')
 
+alphabet_mapping = {
+    "Chinese": r"[\u4E00-\u9FFF\u3400-\u4DBF\U00020000-\U0002A6DF\U0002A700-\U0002B73F\U0002B740-\U0002B81F\U0002B820-\U0002CEAF\U0002CEB0-\U0002EBEF]", # Basic Multilingual Plane, Extension A, Extension B, Extension C, Extension D, Extension E
+    "Cyrillic": r"[\u0400-\u04ff]", # Cyrillic
+    "Japanese": r"[\u3040-\u30ff]", # Hiragana and Katakana (should maybe also include Kanji)
+    "Latin": r"[a-zA-Z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]" # Latin Letters, Latin-1 Supplement (excluding × [U+00D7] and ÷ [U+00F7])
+}
+
 def vaidate_filename(filename : str):
     if IILEGAL_WIN_CHARS.search(filename):
         gr.Warning("Invalid Filename: Illegal characters detected. Remove them or enable 'Trim Illegal Characters' in settings")
@@ -29,17 +36,17 @@ def adjust_filename(filename : str):
     if opts.mm_auto_trim_illegal_chars:
         filename = IILEGAL_WIN_CHARS.sub('', filename)
 
-
     if opts.mm_auto_trim_whitespace:
         filename = re.sub(" +", " ", filename)
 
     if opts.mm_auto_fit_brackets:
         filename = re.sub(r"([\[(\{])\s*([^)\]}]+?)\s*([\])}])", lambda x: f"{x.group(1)}{x.group(2).strip()}{x.group(3)}", filename)
 
-     # Removes leading and trailing whitespace as the OS would do it automatically when saving a file
-    filename = filename.strip()
+    alphabets = opts.mm_filter_alphabet
+    for alphabet in alphabets:
+        filename = re.sub(alphabet_mapping[alphabet], "", filename)
 
-    return filename
+    return filename.strip()
 
 class Card:
     mapping = {
@@ -185,6 +192,10 @@ class Card:
         filename = vaidate_filename(filename)
 
         if not filename:
+            return
+        
+        if opts.mm_disable_download:
+            d_print("Download Disabled. Can be enable in settings 'Development' section")
             return
         
         downloader.download_model(

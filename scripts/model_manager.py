@@ -43,8 +43,13 @@ def on_ui_settings():
         "mm_auto_trim_whitespace": OptionInfo(True, "Trim Whitespace").info("Automatically trim consecutive whitespace series to a single space in the filename during model downloads"),
         "mm_auto_trim_illegal_chars": OptionInfo(True, "Trim Illegal Characters").info("Automatically remove any illegal characters from the filename when downloading a model"),
         "mm_auto_fit_brackets": OptionInfo(True, "Fit Brackets").info("Automatically removes whitespace around brackets in the filename when downloading a model. Eg. ( My Model ) -> (My Model), supports [], {} and ()"),
+        "mm_filter_alphabet": OptionInfo([], "Filter Alphabets", ui_components.DropdownMulti, lambda: {"choices": list(["Chinese", "Japanese", "Latin", "Cyrillic"])}).info("Automatically remove characters from the selected alphabets from the filename when downloading a model"),
         "mm_github_token": OptionInfo("", "GitHub Token").info("GitHub Token used to create a Selenium session, for fetching civitai notifications. Feature still in development!")
     }))
+
+    options_templates.update(options_section(('mm_dev', "Development", "mm"), {
+        "mm_disable_download": OptionInfo(False, "Disable Download").info("Disables the downloading, useful for debugging and testing the UI without actually downloading anything"),
+        }))
 
     # TODO: When more sections are added, assign it here instead
     for key, opt in options_templates.items():
