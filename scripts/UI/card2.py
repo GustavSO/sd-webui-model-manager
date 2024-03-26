@@ -1,12 +1,23 @@
 from functools import reduce
+from math import e
 import gradio as gr
 from scripts.mm_libs.debug import d_print
 from scripts.mm_libs.model import Model
 from scripts.mm_libs import downloader
 from .directory_dropdown import Directory_DropDown as dir_dd
 
+from modules.shared import opts
+
 
 class Card:
+    mapping = {
+        "model_name": "self.selected_model.name",
+        "model_version": "self.selected_model.version",
+        "model_base": "self.selected_model.metadata['sd version']",
+        "model_creator": "self.selected_model.creator",
+        "model_type": "self.selected_model.type",
+    }
+
     def __init__(
         self, title="huh", creator="defcreator", type="deftype", visibility=True
     ) -> None:
@@ -84,6 +95,14 @@ class Card:
         ]
 
     def get_updates(self):
+        # Name creation
+        if opts.mm_auto_naming_formatting == "":
+            name = f"{self.selected_model.name}"
+        else:
+            name = opts.mm_auto_naming_formatting
+            for key, value in self.mapping.items():
+                name = name.replace(key, str(eval(value)))
+
         return [
             gr.update(visible=self.visibility),
             self.selected_model.name,
@@ -97,7 +116,7 @@ class Card:
             self.selected_model.size,
             self.selected_model.metadata["sd version"],
             # self.selected_model.images, #Images are loaded after other info
-            f"{self.selected_model.name} {self.selected_model.version} ({self.selected_model.creator})",
+            name,
             self.dirdd.get_updates(),
         ]
 
