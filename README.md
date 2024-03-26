@@ -9,7 +9,6 @@ A **work in progress** extension for [AUTOMATIC1111's WebUI](https://github.com/
 Before installing this extension, please be aware of the following:
 
 - This extension is still very much work-in-progress. Currently, it handles the downloading of models rather well. Other features like re-naming, deletion and moving of already installed features will come at a later date.
-- Use A1111 1.6.0 or later
 
 ## Current Features
 
@@ -38,11 +37,6 @@ Before installing this extension, please be aware of the following:
 #### Scrape models from your Civitai Notifications
 
 While this feature does work it requires some technical know-how and a GitHub account as it needs a Fine-Grained Token.
-
-### Known Issues:
-
-- In rare occasions, the connection stream to Civitai closes without raising errors. This results in some models being saved before all data has been written to the file, leaving them unusable.
-- Trying to fetch a model that only has preview images that are tagged NSFW while the option to show NSFW images is off, will cause an error as it can't find a suitable image for showing the model
 
 ### Planned Features/Improvements:
 

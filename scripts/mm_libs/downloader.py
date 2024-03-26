@@ -64,14 +64,19 @@ def download_model(file_target, model: Model, image):
         warning = "Couldn't contact CivitAI API, try again"
         gr.Warning(warning), d_print(warning), d_print(r_model.status_code)
         return
-
-    r_img = requests.get(image, allow_redirects=True)
+        
 
     save_file(f"{file_target}.{file_format}", r_model)
-    save_file(f"{file_target}.jpeg", r_img)
+
+    if image:
+        r_img = requests.get(image, allow_redirects=True)
+        save_file(f"{file_target}.jpeg", r_img)
    
-    if  model.type in ("LORA", "LoCon"):
+    if model.type in ("LORA", "LoCon"):
         dump_metadata(file_target, model.metadata)
+
+
+
     gr.Info("Download Complete"), d_print("Download Complete")
     return
 

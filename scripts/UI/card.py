@@ -194,7 +194,7 @@ class Card:
         if models:
             self.models = models
             self.selected_model = models[0]
-            self.selected_image = models[0].images[0][0]
+            self.selected_image = models[0].images[0][0] if models[0].images else None
             self.dirdd.update_choices(models[0].type)
             self.visibility = True
         else:
