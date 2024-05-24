@@ -4,7 +4,7 @@ from scripts.mm_libs import downloader, loader
 from modules import shared
 from .card import Card
 
-loader.sort_dirs()
+# loader.sort_dirs()
 
 
 def UI():

@@ -17,7 +17,8 @@ alphabet_mapping = {
     "Chinese": r"[\u4E00-\u9FFF\u3400-\u4DBF\U00020000-\U0002A6DF\U0002A700-\U0002B73F\U0002B740-\U0002B81F\U0002B820-\U0002CEAF\U0002CEB0-\U0002EBEF]", # Basic Multilingual Plane, Extension A, Extension B, Extension C, Extension D, Extension E
     "Cyrillic": r"[\u0400-\u04ff]", # Cyrillic
     "Japanese": r"[\u3040-\u30ff]", # Hiragana and Katakana (should maybe also include Kanji)
-    "Latin": r"[a-zA-Z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]" # Latin Letters, Latin-1 Supplement (excluding × [U+00D7] and ÷ [U+00F7])
+    "Latin": r"[a-zA-Z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]", # Latin Letters, Latin-1 Supplement (excluding × [U+00D7] and ÷ [U+00F7]),
+    "Korean": r"[\u3131-\u3163\uac00-\ud7a3]" # Hangul Jamo, Hangul Syllables /TODO: Validate
 }
 
 name_mapping = {

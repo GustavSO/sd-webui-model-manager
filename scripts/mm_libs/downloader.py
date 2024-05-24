@@ -7,10 +7,14 @@ from .debug import d_print
 from tqdm import tqdm
 from pathlib import Path
 from modules.shared import opts
+from urllib.parse import urlparse, parse_qs
 
 civit_api = "https://civitai.com/api/v1/models/"
+civit_api_alt = "https://civitai.com/api/v1/model-versions/"
 civit_pattern = "(?<=^https:\/\/civitai.com\/models\/)[\d]+|^[\d]+$"
 
+# TODO: Add support for retrieving sub models directly
+# TODO: Clean up the code, it's a mess
 def fetch(model_url) -> list[Model]:
     # Check if API key is present
     if not opts.mm_supress_API_warnings and not opts.mm_civitai_api_key:
@@ -28,7 +32,8 @@ def fetch(model_url) -> list[Model]:
 
     if not r.ok:
         warning = "Couldn't contact CivitAI API, try again"
-        gr.Warning(warning), d_print(warning), d_print(r.status_code)
+        error = f"Error: {r.status_code} - {r.text}"
+        gr.Warning(warning), d_print(warning), d_print(error)
         return
 
     try:
@@ -62,7 +67,8 @@ def download_model(file_target, model: Model, image):
 
     if not r_model.ok:
         warning = "Couldn't contact CivitAI API, try again"
-        gr.Warning(warning), d_print(warning), d_print(r_model.status_code)
+        error = f"Error: {r_model.status_code} - {r_model.text}"
+        gr.Warning(warning), d_print(warning), d_print(error)
         return
         
 
