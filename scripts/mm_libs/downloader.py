@@ -78,7 +78,7 @@ def download_model(file_target, model: Model, image):
         r_img = requests.get(image, allow_redirects=True)
         save_file(f"{file_target}.jpeg", r_img)
    
-    if model.type in ("LORA", "LoCon"):
+    if model.type in ("LORA", "LoCon", "DoRA"):
         dump_metadata(file_target, model.metadata)
 
 
