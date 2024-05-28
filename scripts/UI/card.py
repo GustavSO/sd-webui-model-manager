@@ -38,7 +38,7 @@ class Card:
                     self.model_type_text = gr.Textbox(
                         label="Type", max_lines=1, interactive=False
                     )
-                    self.model_keywords_text = gr.Textbox(
+                    self.model_trigger_words_text = gr.Textbox(
                         label="Trigger Words",
                         placeholder="No trigger words specified by creator",
                         interactive=True,
@@ -63,8 +63,8 @@ class Card:
                 download_btn = gr.Button("Download")
 
 
-        download_btn.click(namer.adjust_filename, self.filename_input, self.filename_input).then(self.download, self.filename_input, None)
-        
+        download_btn.click(namer.adjust_filename, self.filename_input, self.filename_input).then(self.download, [self.filename_input, self.model_trigger_words_text], None)
+
         self.model_version_dropdown.select(
             self.change_model, None, self.get_components()
         ).then(
@@ -79,7 +79,7 @@ class Card:
             self.model_version_dropdown,
             self.model_creator_text,
             self.model_type_text,
-            self.model_keywords_text,
+            self.model_trigger_words_text,
             self.model_size_text,
             self.model_base_text,
             # self.model_gallery, #Images are loaded after other info
@@ -138,8 +138,9 @@ class Card:
             self.selected_image = self.selected_model.images[0][0]
         return self.get_updates()
 
-    def download(self, filename):
+    def download(self, filename, trigger_words):
         filename = namer.vaidate_filename(filename)
+        self.selected_model.metadata["activation text"] = trigger_words
 
         if not filename:
             return
