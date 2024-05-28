@@ -29,14 +29,13 @@ class Directory_Dropdown:
 
     # Retain selected directory if another of the same type of model is fetched
     def get_updates(self):
-        if self.changed:
+        if self.changed or self.dropdown.value != self.selected_dir:
             self.changed = False
             return gr.Dropdown.update(value=self.short_dirs[0], choices=self.short_dirs)
         else:
             return gr.Dropdown.update()
 
     # Updates the choices of the directory dropdown based on the type of model fetched.
-    # Performs a reduction on the string paths of the subdirectories to make them more readable.
     def update_choices(self, model_type: str):
         if self.path == folders[model_type][0]:
             return self.short_dirs
@@ -46,7 +45,6 @@ class Directory_Dropdown:
         self.model_type = model_type
 
         self.short_dirs = [os.path.relpath(dir, self.path.parent) for dir in folders[model_type]]
-
         self.selected_dir = folders[model_type][0]
 
     def change_directory(self, evt: gr.SelectData):
