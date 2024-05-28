@@ -1,7 +1,7 @@
 import gradio as gr
 from functools import reduce
-from .card import Card as C1
-from .card2 import Card as C2
+from .smallcard import Card as C1
+from .card import Card as C2
 from scripts.mm_libs.model import Model
 from scripts.mm_libs import downloader
 from scripts.mm_libs import selenium_dynamic as sd

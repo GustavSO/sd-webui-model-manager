@@ -12,7 +12,7 @@ class Model(object):
         self.creator = data["creator"]["username"]
         self.version = model_version["name"]
         self.images = get_images(model_version["images"])
-        self.selected_image = self.images[0][0] # This is so stupid, fix this with some js somehow or something
+        self.selected_image = self.images[0][0] if self.images else None # This is so stupid, fix this with some js somehow or something
         self.download_url = model_version["downloadUrl"]
         self.type = data["type"]
         self.size = convert_size(model_version["files"][0]["sizeKB"])

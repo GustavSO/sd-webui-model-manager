@@ -1,10 +1,8 @@
-
 from tkinter import Tk
 import gradio as gr
 from scripts.mm_libs import downloader, loader
 from modules import shared
-from .card2 import Card
-
+from .card import Card
 
 def UI():
     def fetch(input):
@@ -30,4 +28,7 @@ def UI():
         )
 
     model_card = Card()
-    fetch_btn.click(fetch, model_url_input, model_card.get_components() + [model_url_input])
+
+    fetch_btn.click(
+        fetch, model_url_input, model_card.get_components() + [model_url_input]
+    ).then(model_card.update_gallery, None, model_card.model_gallery)
