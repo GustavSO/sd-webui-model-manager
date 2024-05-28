@@ -87,13 +87,7 @@ class Card:
         ]
 
     def get_updates(self):
-        excluded_words = opts.mm_excluded_words_or_phrases.split(",") if opts.mm_excluded_words_or_phrases else []
-        if opts.mm_auto_naming_formatting == "":
-            name = f"{self.selected_model.name}"
-            if excluded_words:
-                name = namer.remove_excluded_words(name, excluded_words)
-        else:
-            name = namer.format_filename(opts.mm_auto_naming_formatting, excluded_words, self.selected_model)
+        name = namer.format_filename(opts.mm_auto_naming_formatting, self.selected_model)
 
         if opts.mm_format_on_fetch:
             name = namer.adjust_filename(name)

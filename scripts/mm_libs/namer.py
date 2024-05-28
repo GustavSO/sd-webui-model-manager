@@ -36,17 +36,24 @@ def vaidate_filename(filename : str):
 
     return filename
 
-def remove_excluded_words(filename : str, excluded_words : list):
+# Remove excluded words from the filename
+# Ignore case
+def remove_excluded_words(filename : str):
+    excluded_words = opts.mm_excluded_words_or_phrases.split(",") if opts.mm_excluded_words_or_phrases else []
     for word in excluded_words:
-        filename = re.sub(rf"\b{word}\b", "", filename)
+        word = word.strip()
+        filename = re.sub(rf"\b{word}\b", "", filename, flags=re.IGNORECASE)
 
     return filename
 
-def format_filename(format : str, excluded_words : list, model: Model):
+def format_filename(format : str, model: Model):
+    if not format:
+        return remove_excluded_words(f"{model.name})")
+
     for key, value in name_mapping.items():
         eval_value = str(eval(value))
         if key in ['model_name', 'model_version']:
-            eval_value = remove_excluded_words(eval_value, excluded_words)
+            eval_value = remove_excluded_words(eval_value)
         format = format.replace(key, eval_value)
 
     return format
