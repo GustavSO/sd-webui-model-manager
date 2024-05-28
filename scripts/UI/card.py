@@ -4,13 +4,14 @@ import gradio as gr
 from scripts.mm_libs.debug import d_print
 from scripts.mm_libs.model import Model
 from scripts.mm_libs import downloader, namer
-from .directory_dropdown import Directory_DropDown as dir_dd
+from .directory_dropdown import Directory_Dropdown as dir_dd
+
 
 from modules.shared import opts
 
 class Card:
     def __init__(
-        self, title="huh", creator="defcreator", type="deftype", visibility=True
+        self, title="name_placeholder", creator="creator_placeholder", type="type_placeholder", visibility=True
     ) -> None:
         self.models: list[Model] = None
         self.selected_model: Model = None
