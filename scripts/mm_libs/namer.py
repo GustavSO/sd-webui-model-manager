@@ -54,6 +54,12 @@ def format_filename(format : str, model: Model):
         eval_value = str(eval(value))
         if key in ['model_name', 'model_version']:
             eval_value = remove_excluded_words(eval_value)
+            if key == 'model_version':
+                if opts.mm_decimalize_versioning:
+                    eval_value = re.sub(r"V(\d+)(?!\.\d+)", lambda x: f"V{x.group(1)}.0", eval_value)
+                if opts.mm_capatalize_versioning:
+                    eval_value = re.sub(r"v(\d+)", lambda x: f"V{x.group(1)}", eval_value)
+
         format = format.replace(key, eval_value)
 
     return format
@@ -75,11 +81,11 @@ def adjust_filename(filename : str):
     if opts.mm_capatalize:
         filename = re.sub(r"\b\w", lambda x: x.group().upper(), filename)
 
-    if opts.mm_capatalize_versioning:
-        filename = re.sub(r"v(\d+)", lambda x: f"V{x.group(1)}", filename)
+    # if opts.mm_capatalize_versioning:
+    #     filename = re.sub(r"v(\d+)", lambda x: f"V{x.group(1)}", filename)
     
-    if opts.mm_decimalize_versioning:
-        filename = re.sub(r"V(\d+)(?!\.\d+)", lambda x: f"V{x.group(1)}.0", filename)
+    # if opts.mm_decimalize_versioning:
+    #     filename = re.sub(r"V(\d+)(?!\.\d+)", lambda x: f"V{x.group(1)}.0", filename)
 
     if opts.mm_auto_trim_whitespace:
         filename = re.sub(" +", " ", filename)

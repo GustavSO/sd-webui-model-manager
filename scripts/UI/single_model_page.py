@@ -4,9 +4,6 @@ from scripts.mm_libs import downloader, loader
 from modules import shared
 from .card import Card
 
-# loader.sort_dirs()
-
-
 def UI():
     def fetch(input):
         if shared.opts.mm_auto_paste:
