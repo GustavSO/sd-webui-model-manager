@@ -3,6 +3,7 @@ import gradio as gr
 import browser_cookie3
 import os
 
+from scripts.mm_libs.debug import *
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
@@ -28,7 +29,7 @@ def create_civitai_session():
     if os.environ.get("GH_TOKEN") is None:
         raise Exception("GH_TOKEN environment variable is not set. Please set it to use this feature")
     
-    print("Creating Civitai Session using Selenium...")
+    d_print("Creating Civitai Session using Selenium...")
 
     # Is this needed?
     options = FirefoxOptions()
@@ -56,17 +57,17 @@ def get_page_source() -> list[list[Model]]:
     if civitai_driver is None:
         raise Exception("Civitai Session not created. Please create it first using 'Create Civitai Session' button")
     
-    print("Fetching models from Civitai...")
+    d_print("Fetching models from Civitai...")
     notifications = civitai_driver.find_elements(By.CSS_SELECTOR, "a.mantine-Text-root.mantine-1nqtos1")
     scaped_models = []
     model_ids = []
     for notification in notifications:
         if "articles" in notification.get_attribute("href"):
-            print("unsupported format or model type. Skipping...")
+            d_print("unsupported format or model type. Skipping...")
             continue
-        print(f"Fetching model info for: {notification.get_attribute('href')}")
+        d_print(f"Fetching model info for: {notification.get_attribute('href')}")
         model_ids.append(notification.get_attribute("href").split("/")[-1])
         scaped_models.append(fetch(notification.get_attribute("href")))
         time.sleep(1)
-    print(f"Finished fetching models!. Found {len(model_ids)} models supported models")
+    d_print(f"Finished fetching models!. Found {len(model_ids)} models supported models")
     return scaped_models

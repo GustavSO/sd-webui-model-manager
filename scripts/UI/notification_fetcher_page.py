@@ -1,4 +1,6 @@
 import gradio as gr
+import webbrowser
+
 from functools import reduce
 from .smallcard import Card as C1
 from .card import Card as C2
@@ -6,8 +8,8 @@ from scripts.mm_libs.model import Model
 from scripts.mm_libs import downloader
 from scripts.mm_libs import selenium_dynamic as sd
 from itertools import zip_longest
-import webbrowser
 from modules import shared
+from scripts.mm_libs.debug import d_print
 
 models: list[list[Model]] = []
 cards: list[C2] = []
@@ -21,13 +23,13 @@ def UI():
         try:
             sd.create_civitai_session()
         except Exception as e:
-            print(f"Error: {e}")
+            d_print(f"Error: {e}")
 
-    gr.Markdown("""## Fetch Models from your Civitai Notifications Page
-                This is a very work in progress feature, that will allow you to fetch models from your Civitai notifications page.
+    gr.Markdown("""## Fetch and download models from your Civitai notifications page
+                This is a very work in progress feature, that will allow you to fetch and download models from your Civitai notifications page.
                 Can be a bit hard to get working right now as it requires a Github token, to download a FireFox driver.
                 Will look into how to get it working without a token, and instead just use whatever driver is already installed on the system.
-                For now, if you want to test it, you need to create a fine-grained token on GitHub and paste it into the Github Token Setting in 'Settings->Model Manager'.
+                For now, if you want to test it, you need to create a fine-grained token on GitHub and paste it into the Github Token Setting in 'Settings -> Model Manager -> Testing'.
                 """)
 
     create_session_btn = gr.Button("Create Civitai Session", visible=is_token_set)
@@ -39,7 +41,7 @@ def UI():
         try:
             models = sd.get_page_source()
         except Exception as e:
-            print(f"Error: {e}")
+            d_print(f"Error: {e}")
             return
         return update_cards(models)
 
@@ -61,7 +63,7 @@ def UI():
             for card, model in zip(cards, models):
                 card.insert_models(model)
 
-        print("Cards updated! Updating UI...")
+        d_print("Cards updated! Updating UI...")
         return (
             reduce(lambda acc, card: acc + card.get_updates(), cards, [])
             + get_pagination_states()
