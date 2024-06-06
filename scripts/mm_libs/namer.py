@@ -2,6 +2,7 @@ import gradio as gr
 from modules.shared import opts
 import re
 from scripts.mm_libs.model import Model
+from scripts.mm_libs.debug import *
 
 # TODO: Should detect on a per-OS basis
 IILEGAL_WIN_CHARS = re.compile(r'[<>:"/|?*\\]')
@@ -26,15 +27,16 @@ name_mapping = {
 
 # Validate the filename for illegal characters and empty strings
 def vaidate_filename(filename : str):
+    # This will only happen if the user have turned off the auto trim illegal characters setting
     if IILEGAL_WIN_CHARS.search(filename):
-        gr.Warning("Invalid Filename: Illegal characters detected. Remove them or enable 'Trim Illegal Characters' in settings")
-        return
+        d_error("Invalid Filename: Illegal characters detected. Remove them or enable 'Trim Illegal Characters' in settings")
+        return False
 
-    if filename == "":
-        gr.Warning("Invalid Filename: Filename cannot be empty")
-        return
+    if not filename:
+        d_error("Invalid Filename: Filename cannot be empty")
+        return False
 
-    return filename
+    return True
 
 # Remove excluded words from the filename
 # Ignore case

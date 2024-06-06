@@ -16,7 +16,7 @@ def on_ui_tabs():
         with gr.Tab("Downloader"):
             with gr.Tab("Single Model"):
                 single_model_page.UI()
-            with gr.Tab("Fetch from Civitai notifications"):
+            with gr.Tab("Scrape Civitai Notifications"):
                 notification_fetcher_page.UI()
         # with gr.Tab("Utilities"):
         #     utilities.UI()
@@ -41,6 +41,7 @@ def on_ui_settings():
         "mm_civitai_api_key": OptionInfo("", "Civitai API key").info("API Key used to download certain models. Create one at https://civitai.com/user/account"),
         "mm_supress_API_warnings": OptionInfo(False, "Supress API key warning").info("Only applies when fetching. Will still show errors on download if it fails due to authentication issues"),
         "mm_folder_depth": OptionInfo(1, "Subdirectory Depth", gr.Slider, {"minimum": 0, "maximum": 10, "step": 1}).info("This is the depth of subdirectories to search for when downloading models. Default is 1, which means it will only search the immediate subdirectories of the root folder for the model type"),
+        "mm_image_amount": OptionInfo(0, "Image Amount", gr.Slider, {"minimum": 0, "maximum": 10, "step": 1}).info("The amount of images to display in the model card. 0 will fetch all images, but can be slow for models with many images. Gradio 4 will fix this issue"),
     }))
 
     options_templates.update(options_section(('mm_auto_naming', "Auto Naming", "mm"), {
@@ -59,7 +60,11 @@ def on_ui_settings():
 
     options_templates.update(options_section(('mm_test', "Testing", "mm"), {
         "mm_disable_download": OptionInfo(False, "Disable Download").info("Disables the downloading, useful for debugging and testing the UI without actually downloading anything"),
-        "mm_github_token": OptionInfo("", "GitHub Token").info("GitHub Token used to create a Selenium session, for fetching civitai notifications. Feature still in development!")
+        "mm_github_token": OptionInfo("", "GitHub Token").info("GitHub Token used to create a Selenium session, for fetching civitai notifications. Feature still in development!"),
+        "mm_print_warnings": OptionInfo(True, "Print Warnings").info("Print warnings to the console, if false the warning messages will only show on the UI"),
+        "mm_print_errors": OptionInfo(True, "Print Errors").info("Print errors to the console, if false the error messages will only show on the UI"),
+        "mm_print_info": OptionInfo(True, "Print Info").info("Print info to the console, if false the info messages will only show on the UI"),
+        "mm_testing_model_url": OptionInfo("", "Testing Model URL").info("URL to test the model fetching with. If filled, each time the model fetching is triggered, this URL will be used. Useful for testing the fetching without having to go to the Civitai website. Leave empty to disable"),
         }))
 
     # TODO: When more sections are added, assign it here instead

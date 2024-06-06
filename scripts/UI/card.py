@@ -1,17 +1,23 @@
-from functools import reduce
-import re
+import re, time
+from turtle import down
 import gradio as gr
-from scripts.mm_libs.debug import d_print
+
+from scripts.mm_libs.debug import d_print, d_warn
 from scripts.mm_libs.model import Model
 from scripts.mm_libs import downloader, namer
 from .directory_dropdown import Directory_Dropdown as dir_dd
-
-
 from modules.shared import opts
+
+from functools import reduce
+
 
 class Card:
     def __init__(
-        self, title="name_placeholder", creator="creator_placeholder", type="type_placeholder", visibility=True
+        self,
+        title="name_placeholder",
+        creator="creator_placeholder",
+        type="type_placeholder",
+        visibility=True,
     ) -> None:
         self.models: list[Model] = None
         self.selected_model: Model = None
@@ -60,18 +66,27 @@ class Card:
                     max_lines=1,
                 )
                 self.dirdd = dir_dd()
-                download_btn = gr.Button("Download")
+                download_btn = gr.Button("Download", elem_classes="mm_btn")
+            progress_bar = gr.HTML(
+                value='<div style="min-height: 0px;"></div>',
+                elem_id="cardProgressBar",
+                elem_classes="progress_bar",
+            )
 
-
-        download_btn.click(namer.adjust_filename, self.filename_input, self.filename_input).then(self.download, [self.filename_input, self.model_trigger_words_text], None)
+        download_btn.click(
+            namer.adjust_filename, self.filename_input, self.filename_input
+        ).then(
+            fn=self.ready_download,
+            inputs=[self.filename_input, self.model_trigger_words_text],
+            outputs=progress_bar,
+            _js="prepare_progressbar",
+        )
 
         self.model_version_dropdown.select(
-            self.change_model, None, self.get_components()
-        ).then(
-            self.update_gallery, None, self.model_gallery
-        )
+            fn=self.change_model, outputs=self.get_components()
+        ).then(self.update_gallery, None, outputs=self.model_gallery)
         self.model_gallery.select(self.change_image, None, None)
-    
+
     def get_components(self):
         return [
             self.card_box,
@@ -88,7 +103,9 @@ class Card:
         ]
 
     def get_updates(self):
-        name = namer.format_filename(opts.mm_auto_naming_formatting, self.selected_model)
+        name = namer.format_filename(
+            opts.mm_auto_naming_formatting, self.selected_model
+        )
 
         if opts.mm_format_on_fetch:
             name = namer.adjust_filename(name)
@@ -138,19 +155,24 @@ class Card:
             self.selected_image = self.selected_model.images[0][0]
         return self.get_updates()
 
-    def download(self, filename, trigger_words):
-        filename = namer.vaidate_filename(filename)
+    ## TODO: Fix this
+    def ready_download(self, filename, trigger_words, progress=gr.Progress()):
+        if namer.vaidate_filename(filename) == False:
+            return
+
+        # Ensures the metadata is the same as the one in the UI
+        # TODO: Move this to its own function
         self.selected_model.metadata["activation text"] = trigger_words
 
-        if not filename:
-            return
-        
         if opts.mm_disable_download:
-            d_print("Download Disabled. Can be enable in settings 'Development' section")
+            d_print(
+                "Download Disabled. Can be enable in settings 'Development' section"
+            )
             return
-        
-        downloader.download_model(
-            self.dirdd.selected_dir / filename, self.selected_model, self.selected_image
-        )
 
-    
+        downloader.download_model(
+            self.dirdd.selected_dir / filename,
+            self.selected_model,
+            self.selected_image,
+            progress,
+        )

@@ -1,5 +1,6 @@
 import gradio as gr
 from scripts.mm_libs.model import Model
+from scripts.mm_libs.debug import d_print
 
 class Card():
     def __init__(self, title="huh", creator="defcreator", type="deftype", visibility=False) -> None:
@@ -19,7 +20,7 @@ class Card():
                     gr.Dropdown(choices=["Help", "Me"])
                 with gr.Column():
                     self.image_output = gr.Image()
-                    download_btn = gr.Button("Download")
+                    download_btn = gr.Button("Download", elem_classes="mm_btn")
         download_btn.click(self.download, None, None)
 
     def get_components(self):
@@ -39,4 +40,4 @@ class Card():
             self.visibility = False
 
     def download(self):
-        print(self.title)
+        d_print(self.title)
