@@ -17,9 +17,10 @@ def d_error(text):
     timestamp = datetime.now().strftime('%H:%M:%S:%f')[:-3]
     if opts.mm_print_errors:
         print(f"\033[91m[Model Manager ({timestamp})]\033[0m {text}")
-    gr.Error(text)
+    raise gr.Error(text)
 
 def d_info(text):
     timestamp = datetime.now().strftime('%H:%M:%S:%f')[:-3]
-    print(f"\033[92m[Model Manager ({timestamp})]\033[0m {text}")
+    if opts.mm_print_info:
+        print(f"\033[92m[Model Manager ({timestamp})]\033[0m {text}")
     gr.Info(text)

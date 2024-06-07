@@ -14,9 +14,6 @@ from functools import reduce
 class Card:
     def __init__(
         self,
-        title="name_placeholder",
-        creator="creator_placeholder",
-        type="type_placeholder",
         visibility=True,
     ) -> None:
         self.models: list[Model] = None
@@ -103,6 +100,10 @@ class Card:
         ]
 
     def get_updates(self):
+        # If no model is selected, don't update the UI
+        if not self.selected_model:
+            return [gr.update() for _ in range(10)]
+
         name = namer.format_filename(
             opts.mm_auto_naming_formatting, self.selected_model
         )
@@ -150,7 +151,9 @@ class Card:
     def change_model(self, evt: gr.SelectData):
         self.selected_model = self.models[evt.index]
         if len(self.selected_model.images) > self.selected_image_index:
-            self.selected_image = self.selected_model.images[self.selected_image_index][0]
+            self.selected_image = self.selected_model.images[self.selected_image_index][
+                0
+            ]
         else:
             self.selected_image = self.selected_model.images[0][0]
         return self.get_updates()
