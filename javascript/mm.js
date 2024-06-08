@@ -1,5 +1,20 @@
+
+function handleModelManagerTabClick() {
+  document
+    .querySelector("#tabs .tab-nav")
+    .addEventListener("click", function (event) {
+      if (
+        event.target.tagName === "BUTTON" &&
+        event.target.textContent.trim() === "Model Manager"
+      ) {
+        console.log("Model Manager tab clicked");
+        initializeDropdown();
+      }
+    });
+}
+
 // Progress Bar
-function prepare_progressbar(element1, element2) {
+function initializeProgressbar(element1, element2) {
   progressbar = document.getElementById("cardProgressBar");
   child = progressbar.children[0];
   console.log(child);
@@ -10,6 +25,23 @@ function prepare_progressbar(element1, element2) {
   }
 
   return [element1, element2];
+}
+
+// The dropdown. The bane of my existence. I hate it.
+function initializeDropdown() {
+  let js_btn = gradioApp().getElementById("js_init_dir_dropdown");
+
+  if (!js_btn) {
+    console.log("Dropdown button not found");
+    return;
+  }
+  
+  if (js_btn.textContent.trim() === "True") {
+    console.log("Dropdown already initialized");
+    return;
+  }
+
+  js_btn.click();
 }
 
 // Card Buttons
@@ -139,9 +171,6 @@ function addSVGPaths(svgElement) {
   });
 }
 
-//----------------------
-//-Gradio Communication-
-//----------------------
 async function openModelOnCivitai(jsonFile) {
   sendMessageToGradio(jsonFile);
 
@@ -161,6 +190,9 @@ async function openModelOnCivitai(jsonFile) {
   }
 }
 
+//----------------------
+//-Gradio Communication-
+//----------------------
 function sendMessageToGradio(message) {
   let target = gradioApp().querySelector("#from_js textarea");
 
@@ -210,6 +242,7 @@ const getResponseFromGradio = (maxTimeout = 5000) =>
 function onPageLoad() {
   console.log("Page loaded");
 
+  handleModelManagerTabClick();
   addOnClickToButtons();
 }
 

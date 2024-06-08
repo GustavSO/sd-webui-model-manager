@@ -1,5 +1,6 @@
 import os
 import gradio as gr
+from scripts.mm_libs.debug import d_print
 from scripts.mm_libs.loader import folders
 from pathlib import Path
 
@@ -7,10 +8,11 @@ from pathlib import Path
 class Directory_Dropdown:
     def __init__(self) -> None:
         self.short_dirs = []
-        self.selected_dir = None
+        self.selected_dir = None # Used by card.py to get the selected directory
         self.model_type = None
         self.changed = False
         self.path : Path = None
+        self.init = None
 
         # Gradio Structure
         self.dropdown = gr.Dropdown(
@@ -19,16 +21,22 @@ class Directory_Dropdown:
             choices=[],
             interactive=True,
         )
+
+        self.dropdown.select(self.change_directory)
         
-        self.dropdown.select(self.change_directory, None, None)
+        # Hidden elements and functions used by JavaScript for initialization
+        self.js_init_dropdown_btn = gr.Button("False", visible=False, elem_id="js_init_dir_dropdown")
+        self.js_init_dropdown_btn.click(self.init_dropdown, outputs=self.js_init_dropdown_btn)
+        
 
     def get_components(self):
         return self.dropdown
 
-    # Retain selected directory if another of the same type of model is fetched
+    # Should only update the dropdown if the directory has changed or the dropdown has been initialized.
     def get_updates(self):
-        if self.changed or self.dropdown.value != self.selected_dir:
+        if self.changed or self.init:
             self.changed = False
+            self.init = False
             return gr.Dropdown.update(value=self.short_dirs[0], choices=self.short_dirs)
         else:
             return gr.Dropdown.update()
@@ -47,3 +55,8 @@ class Directory_Dropdown:
 
     def change_directory(self, evt: gr.SelectData):
         self.selected_dir = folders[self.model_type][evt.index]
+
+    def init_dropdown(self):
+        self.init = True
+        return "True"
+        

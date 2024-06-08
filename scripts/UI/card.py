@@ -76,7 +76,7 @@ class Card:
             fn=self.ready_download,
             inputs=[self.filename_input, self.model_trigger_words_text],
             outputs=progress_bar,
-            _js="prepare_progressbar",
+            _js="initializeProgressbar",
         )
 
         self.model_version_dropdown.select(
