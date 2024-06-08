@@ -1,3 +1,4 @@
+import decimal
 import gradio as gr
 from modules.shared import opts
 import re
@@ -65,13 +66,16 @@ def format_filename(format: str, model: Model):
             eval_value = remove_excluded_words(eval_value)
             if key == "model_version":
                 if opts.mm_decimalize_versioning:
-                    eval_value = re.sub(
-                        r"V(\d+)(?!\.\d+)", lambda x: f"V{x.group(1)}.0", eval_value
-                    )
+                    d_print("Decimalizing versioning")
+                    d_print(f"Before: {eval_value}")
+                    eval_value = decimalize_versioning(eval_value)
+                    d_print(f"After: {eval_value}")
                 if opts.mm_capatalize_versioning:
-                    eval_value = re.sub(
-                        r"v(\d+)", lambda x: f"V{x.group(1)}", eval_value
-                    )
+                    d_print("Capatalizing versioning")
+                    d_print(f"Before: {eval_value}")
+                    eval_value = capatalize_versioning(eval_value)
+                    d_print(f"After: {eval_value}")
+
 
         format = format.replace(key, eval_value)
 
@@ -139,3 +143,22 @@ def capatalize(filename):
 def trim_whitespace(filename):
     filename = re.sub(" +", " ", filename)
     return filename
+
+def capatalize_versioning(version):
+    return re.sub(r"v(\d+)", lambda x: f"V{x.group(1)}", version)
+
+def decimalize_versioning(version):
+    pattern = r"[Vv](\d+)(,|\.)?(\d*)"
+    
+    def replace_version(match):
+        # If the version number includes a comma, replace it with a dot
+        if match.group(2) == ',':
+            return f"V{match.group(1)}.{match.group(3)}"
+        # If the version number lacks a decimal point, append `.0`
+        elif not match.group(2):
+            return f"V{match.group(1)}.0"
+        # If the version number already includes a dot, return it unchanged
+        else:
+            return f"V{match.group(1)}.{match.group(3)}"
+    
+    return re.sub(pattern, replace_version, version)
