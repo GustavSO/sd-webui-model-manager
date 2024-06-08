@@ -1,7 +1,6 @@
 import math
 
 from modules.shared import opts
-from scripts.mm_libs.debug import d_print
 
 # TODO: Add a "recommended strength" field to the metadata
 # Could also expand with additional data like EPOCHS, Reviews, etc.
@@ -27,7 +26,9 @@ class Model(object):
                 else ""
             ),
             "preferred weight": 0,
+            # Stores the model url both in the notes, visible in the UI, but also in a model url field for easy access.
             "notes": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}",
+            "model url": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}"
         }
 
     def __str__(self):

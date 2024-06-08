@@ -1,9 +1,11 @@
+import json, requests
 from modules import script_callbacks, shared, ui_components
 from modules.options import categories, options_section, OptionInfo, Options
 
 import gradio as gr
 from scripts.mm_libs import loader
 from scripts.UI import single_model_page, notification_fetcher_page, utilities
+from scripts.mm_libs.debug import d_print, d_warn
 
 
 def on_ui_tabs():
@@ -20,6 +22,47 @@ def on_ui_tabs():
                 notification_fetcher_page.UI()
         # with gr.Tab("Utilities"):
         #     utilities.UI()
+
+        
+        def get_model_url(json_file):
+            d_print(f"Retrieving model URL from: {json_file}")
+            download_url = "None"
+
+            try:
+                with open(json_file, "r") as f:
+                    data = json.load(f)
+                    if "model url" in data:
+                        download_url = data["model url"]
+                    elif "notes" in data and data["notes"] != "":
+                        download_url = data["notes"] 
+            except Exception as e:
+                d_warn(f"Error reading JSON file {e.__class__.__name__}")
+                return "None"
+            
+            # TODO: Figure out some way to validate the url, (regex or something) as this causes to much delay
+            # try:
+            #     requests.get(download_url)
+            # except Exception as e:
+            #     d_warn(f"Error contacting download URL {download_url} {e.__class__.__name__}")
+            #     return "None"
+
+
+            if download_url == "None":
+                d_warn("Couldn't find a model URL for the model. Please make sure the JSON file contains a 'model url' or 'notes' field with the URL")
+            return download_url
+
+        # Hidden elements and functions used by JavaScript
+        from_js = gr.Textbox("", visible=False, elem_id="from_js")
+        to_js = gr.Textbox("", visible=False, elem_id="to_js")
+
+        js_open_model_btn = gr.Button(
+            "Open Model",
+            visible=False,
+            elem_id="js_open_model_btn",
+        )
+
+        js_open_model_btn.click(get_model_url, inputs=from_js, outputs=to_js)
+
 
     loader.sort_dirs()
     return [(ui_component, "Model Manager", "model_manager_tab")]

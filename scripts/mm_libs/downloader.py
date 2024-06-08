@@ -93,14 +93,13 @@ def download_model(file_target, model: Model, image, progress):
 
 
 def save_file(file: str, request: requests.Response, progress):
-    total = int(request.headers.get("content-length", 0))
-    
+
     if Path(file).exists():
-        d_warn(
-            "A file with the same name already exists, skipping download. File: " + file
-        )
+        d_warn(f"{file} already exists, skipping download")
         return
 
+    total = int(request.headers.get("content-length", 0))
+    
     with open(file, "wb") as modelfile, tqdm(
         desc=file.split("\\")[-1],
         total=total,
@@ -133,4 +132,3 @@ def save_file(file: str, request: requests.Response, progress):
 def dump_metadata(file, metadata):
     with open(f"{file}.json", "w", encoding="utf8") as metafile:
         json.dump(metadata, metafile, indent=4)
-
