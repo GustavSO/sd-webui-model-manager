@@ -2,7 +2,7 @@ import os
 import gradio as gr
 
 from modules.shared import opts
-from scripts.mm_libs.debug import d_print
+from scripts.mm_libs.debug import d_debug, d_message
 from scripts.mm_libs.loader import folders
 
 from pathlib import Path
@@ -58,8 +58,8 @@ class Directory_Dropdown:
         option_path = check_options(model_type, main_tag)
         if option_path:
             s_option_path = shorten_path(option_path, folders[model_type][0].parent)
-            d_print(f"Options path: {option_path}")
-            d_print(f"Shortened path: {s_option_path}")
+            d_message(f"Options path: {option_path}")
+            d_message(f"Shortened path: {s_option_path}")
 
 
 
@@ -76,7 +76,7 @@ class Directory_Dropdown:
         ]
 
         if option_path and s_option_path in self.short_dirs:
-            d_print(f"Options path in short dirs: {s_option_path}")
+            d_message(f"Options path in short dirs: {s_option_path}")
             self.selected_dir = option_path
             self.update_value = s_option_path
             return
@@ -98,16 +98,16 @@ def check_options(model_type: str, main_tag: str) -> Path:
         model_type = "lora"
 
     options_name = f"opts.mm_af_{model_type.lower()}_{main_tag}"
-    d_print(f"Checking options for {options_name}")
+    d_debug(f"Checking options for {options_name}")
     try:
         value: str = eval(options_name) if eval(options_name) else "Option not set"
     except Exception as e:
-        d_print(f"Error fetching value from options: {e}")
+        d_debug(f"Error fetching value from options: {e}")
         return
 
     option_path = Path(value)
     if not option_path.exists():
-        d_print(f"Path from options does not exist: {option_path}")
+        d_debug(f"Path from options does not exist: {option_path}")
         return
 
     return option_path

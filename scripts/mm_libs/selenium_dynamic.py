@@ -29,7 +29,7 @@ def create_civitai_session():
     if os.environ.get("GH_TOKEN") is None:
         raise Exception("GH_TOKEN environment variable is not set. Please set it to use this feature")
     
-    d_print("Creating Civitai Session using Selenium...")
+    d_message("Creating Civitai Session using Selenium...")
 
     # Is this needed?
     options = FirefoxOptions()
@@ -57,17 +57,17 @@ def get_page_source() -> list[list[Model]]:
     if civitai_driver is None:
         raise Exception("Civitai Session not created. Please create it first using 'Create Civitai Session' button")
     
-    d_print("Fetching models from Civitai...")
+    d_message("Fetching models from Civitai...")
     notifications = civitai_driver.find_elements(By.CSS_SELECTOR, "a.mantine-Text-root.mantine-1nqtos1")
     scaped_models = []
     model_ids = []
     for notification in notifications:
         if "articles" in notification.get_attribute("href"):
-            d_print("unsupported format or model type. Skipping...")
+            d_message("unsupported format or model type. Skipping...")
             continue
-        d_print(f"Fetching model info for: {notification.get_attribute('href')}")
+        d_message(f"Fetching model info for: {notification.get_attribute('href')}")
         model_ids.append(notification.get_attribute("href").split("/")[-1])
         scaped_models.append(fetch(notification.get_attribute("href")))
         time.sleep(1)
-    d_print(f"Finished fetching models!. Found {len(model_ids)} models supported models")
+    d_message(f"Finished fetching models!. Found {len(model_ids)} models supported models")
     return scaped_models

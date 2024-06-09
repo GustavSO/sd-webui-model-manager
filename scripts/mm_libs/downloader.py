@@ -6,7 +6,7 @@ import gradio as gr
 import json
 
 from .model import Model, convert_size
-from .debug import d_info, d_print, d_warn
+from .debug import d_info, d_message, d_warn
 from tqdm import tqdm
 from pathlib import Path
 from modules.shared import opts
@@ -44,7 +44,7 @@ def fetch(model_url) -> list[Model]:
         model_data = r.json()
     except json.JSONDecodeError:
         d_warn("Couldn't decode CivitAI API response, try again. Servers might be down")
-        d_print(f"Error: {r.status_code} - {r.text}")
+        d_message(f"Error: {r.status_code} - {r.text}")
         return
 
     model_list = []
@@ -55,7 +55,7 @@ def fetch(model_url) -> list[Model]:
 
 
 def download_model(file_target, model: Model, image, progress):
-    d_print("Requesting download from CivitAI")
+    d_message("Requesting download from CivitAI")
 
     # Read more about their API Key authentication here: https://education.civitai.com/civitais-guide-to-downloading-via-api/
     r_model = requests.get(
@@ -64,7 +64,7 @@ def download_model(file_target, model: Model, image, progress):
         stream=True,
     )
 
-    d_print(f"Response Status Code: {r_model.status_code}")
+    d_message(f"Response Status Code: {r_model.status_code}")
 
     if r_model.status_code == 401:
         error = "Required authentication failed, please add your Civitai API key in the settings or ensure it is correct"
@@ -77,7 +77,7 @@ def download_model(file_target, model: Model, image, progress):
     if not r_model.ok:
         warning = "Couldn't contact CivitAI API, try again"
         error = f"Error: {r_model.status_code} - {r_model.text}"
-        d_warn(warning), d_print(error)
+        d_warn(warning), d_message(error)
         return
 
     save_file(f"{file_target}.{file_format}", r_model, progress)

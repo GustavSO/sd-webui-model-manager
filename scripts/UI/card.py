@@ -1,6 +1,6 @@
 import gradio as gr
 
-from scripts.mm_libs.debug import d_print, d_warn
+from scripts.mm_libs.debug import d_message, d_warn
 from scripts.mm_libs.model import Model
 from scripts.mm_libs import downloader, namer
 from .directory_dropdown import Directory_Dropdown as dir_dd
@@ -166,7 +166,7 @@ class Card:
         self.selected_model.metadata["activation text"] = trigger_words
 
         if opts.mm_disable_download:
-            d_print(
+            d_message(
                 "Download Disabled. Can be enable in settings 'Development' section"
             )
             return
