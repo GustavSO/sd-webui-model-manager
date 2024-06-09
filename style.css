@@ -6,3 +6,20 @@
     margin-bottom: 25px;
     margin-top: 15px;
 }
+
+.mm-open-civit.card-button {
+    filter: drop-shadow(2px 2px 3px black);
+    display: flex;
+    align-items: center;
+}
+
+.mm-open-civit.card-button:hover svg {
+    fill: blue !important;
+}
+
+.extra-network-control--tag{
+    padding: 0.25rem;
+    align-self: center;
+    display: inline-flex;
+    cursor: pointer;
+}

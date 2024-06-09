@@ -1,15 +1,18 @@
-import re, time
-from turtle import down
 import gradio as gr
 
-from scripts.mm_libs.debug import d_print, d_warn
-from scripts.mm_libs.model import Model
+from scripts.mm_libs.debug import d_message, d_warn
+from scripts.mm_libs.model import Model, sanitize_trigger_words
 from scripts.mm_libs import downloader, namer
 from .directory_dropdown import Directory_Dropdown as dir_dd
+from modules import ui 
 from modules.shared import opts
+from modules.ui_components import ToolButton
 
 from functools import reduce
 
+# Should probably move this to a more appropriate place
+CLEAN_SYMBOL = '\U0001f9f9\ufe0f' #🧹
+FORMAT_SYMBOL = '\u270F\ufe0f' #✏️
 
 class Card:
     def __init__(
@@ -41,11 +44,13 @@ class Card:
                     self.model_type_text = gr.Textbox(
                         label="Type", max_lines=1, interactive=False
                     )
-                    self.model_trigger_words_text = gr.Textbox(
-                        label="Trigger Words",
-                        placeholder="No trigger words specified by creator",
-                        interactive=True,
-                    )
+                    with gr.Row():
+                        self.model_trigger_words_text = gr.Textbox(
+                            label="Trigger Words",
+                            placeholder="No trigger words specified by creator",
+                            interactive=True,
+                        )
+                        sanitize_words = ToolButton(CLEAN_SYMBOL, tooltip="Sanitize Trigger Words") # Figure out how to enable tooltips, something to do with classname i think
                     self.model_size_text = gr.Textbox(
                         label="Size", interactive=False, max_lines=1
                     )
@@ -62,6 +67,7 @@ class Card:
                     interactive=True,
                     max_lines=1,
                 )
+                clean_filename = ToolButton(CLEAN_SYMBOL, tooltip="Clean Filename")
                 self.dirdd = dir_dd()
                 download_btn = gr.Button("Download", elem_classes="mm_btn")
             progress_bar = gr.HTML(
@@ -76,13 +82,16 @@ class Card:
             fn=self.ready_download,
             inputs=[self.filename_input, self.model_trigger_words_text],
             outputs=progress_bar,
-            _js="prepare_progressbar",
+            _js="initializeProgressbar",
         )
 
         self.model_version_dropdown.select(
             fn=self.change_model, outputs=self.get_components()
         ).then(self.update_gallery, None, outputs=self.model_gallery)
         self.model_gallery.select(self.change_image, None, None)
+
+        sanitize_words.click(fn=sanitize_trigger_words, inputs=self.model_trigger_words_text, outputs=self.model_trigger_words_text)
+        clean_filename.click(namer.adjust_filename, self.filename_input, self.filename_input)
 
     def get_components(self):
         return [
@@ -133,7 +142,7 @@ class Card:
             self.models = models
             self.selected_model = models[0]
             self.selected_image = models[0].images[0][0] if models[0].images else None
-            self.dirdd.update_choices(models[0].type)
+            self.dirdd.update_choices(models[0].type, models[0].main_tag)
             self.visibility = True
         else:
             self.visibility = False
@@ -168,7 +177,7 @@ class Card:
         self.selected_model.metadata["activation text"] = trigger_words
 
         if opts.mm_disable_download:
-            d_print(
+            d_message(
                 "Download Disabled. Can be enable in settings 'Development' section"
             )
             return

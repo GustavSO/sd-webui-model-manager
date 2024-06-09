@@ -9,7 +9,7 @@ from scripts.mm_libs import downloader
 from scripts.mm_libs import selenium_dynamic as sd
 from itertools import zip_longest
 from modules import shared
-from scripts.mm_libs.debug import d_print
+from scripts.mm_libs.debug import d_message
 
 models: list[list[Model]] = []
 cards: list[C2] = []
@@ -23,7 +23,7 @@ def UI():
         try:
             sd.create_civitai_session()
         except Exception as e:
-            d_print(f"Error: {e}")
+            d_message(f"Error: {e}")
 
     gr.Markdown("""## Fetch and download models from your Civitai notifications page
                 This is a very work in progress feature, that will allow you to fetch and download models from your Civitai notifications page.
@@ -41,7 +41,7 @@ def UI():
         try:
             models = sd.get_page_source()
         except Exception as e:
-            d_print(f"Error: {e}")
+            d_message(f"Error: {e}")
             return
         return update_cards(models)
 
@@ -63,7 +63,7 @@ def UI():
             for card, model in zip(cards, models):
                 card.insert_models(model)
 
-        d_print("Cards updated! Updating UI...")
+        d_message("Cards updated! Updating UI...")
         return (
             reduce(lambda acc, card: acc + card.get_updates(), cards, [])
             + get_pagination_states()

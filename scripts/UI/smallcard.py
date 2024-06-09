@@ -1,6 +1,6 @@
 import gradio as gr
 from scripts.mm_libs.model import Model
-from scripts.mm_libs.debug import d_print
+from scripts.mm_libs.debug import d_message
 
 class Card():
     def __init__(self, title="huh", creator="defcreator", type="deftype", visibility=False) -> None:
@@ -40,4 +40,4 @@ class Card():
             self.visibility = False
 
     def download(self):
-        d_print(self.title)
+        d_message(self.title)
