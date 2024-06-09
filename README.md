@@ -14,24 +14,32 @@ https://github.com/GustavSO/sd-webui-model-manager/assets/65391253/7bcac98f-1600
   - Hypernetworks
   - Embeddings
 
-### View and Edit model details 🔍
+### View and Edit Model Details 🔍
   - See and change many properties of the model before downloading it:
-    - Filename
-    - Target directory
-    - Preview Image
-    - Trigger Words
+    - Customize the filename
+    - Choose the target directory
+    - Select preview image
+    - Adjust trigger words
 
 ### Auto Naming 🏷️
-- An extensive suite of settings for automatic filename modification upon fetching a model:
+- An extensive suite of settings for automatic filename modification upon model retrieval:
   - Dynamic naming structuring using model attributes like base model, version, creator, etc.
-  - Filter characters from specific alphabets
+  - Filter out characters from specific alphabets
   - Exclude specific words or phrases
-  - Automatically trim whitespaces
-  - Remove illegal filename characters
-  - **Many more**
+  - Automatically trim excess whitespaces
+  - Eliminate illegal filename characters
+  - **And much more**
+
+ ### Auto Folder Selection 📂
+ - Save time by setting default folders for each main tag on Civitai, eliminating the need for manual folder selection during downloads.
+   - *Currently only works for LoRA, DoRA and LyCORIS*
+
+### Quick Access to Source 🌐
+- Easily open the original download page for any model, allowing you to quickly revisit and explore the source.-
+  - *Currently only works on models downloaded using Model Manager.*
  
 ### Highly Customizable 🎛️
-- A lot of various settings, allowing the user to tune the various features to their liking
+- Extensive settings provide numerous options for users to tailor features to their specific needs and preferences.
 
 ### Work-in-progress 🚧
 - Scrape models from your Civitai notifications page
