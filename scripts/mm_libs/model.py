@@ -52,7 +52,6 @@ class Model(object):
             "notes": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}",
             "model url": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}"
         }
-        print(f"Main Tag: {self.main_tag}\n")
 
     def __str__(self):
         return f"{self.name} {self.version} ({self.creator})"

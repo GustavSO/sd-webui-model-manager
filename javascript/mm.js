@@ -1,4 +1,6 @@
 
+// Add event listener to Model Manager tab
+// The event doesn't do anything yet
 function handleModelManagerTabClick() {
   document
     .querySelector("#tabs .tab-nav")
@@ -8,7 +10,6 @@ function handleModelManagerTabClick() {
         event.target.textContent.trim() === "Model Manager"
       ) {
         console.log("Model Manager tab clicked");
-        initializeDropdown();
       }
     });
 }
@@ -27,22 +28,22 @@ function initializeProgressbar(element1, element2) {
   return [element1, element2];
 }
 
-// The dropdown. The bane of my existence. I hate it.
-function initializeDropdown() {
-  let js_btn = gradioApp().getElementById("js_init_dir_dropdown");
+// // The dropdown. The bane of my existence. I hate it.
+// function initializeDropdown() {
+//   let js_btn = gradioApp().getElementById("js_init_dir_dropdown");
 
-  if (!js_btn) {
-    console.log("Dropdown button not found");
-    return;
-  }
+//   if (!js_btn) {
+//     console.log("Dropdown button not found");
+//     return;
+//   }
   
-  if (js_btn.textContent.trim() === "True") {
-    console.log("Dropdown already initialized");
-    return;
-  }
+//   if (js_btn.textContent.trim() === "True") {
+//     console.log("Dropdown already initialized");
+//     return;
+//   }
 
-  js_btn.click();
-}
+//   js_btn.click();
+// }
 
 // Card Buttons
 function addOnClickToButtons() {

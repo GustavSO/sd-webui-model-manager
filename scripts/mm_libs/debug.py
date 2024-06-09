@@ -1,3 +1,5 @@
+import inspect
+import os
 import gradio as gr
 
 from datetime import datetime
@@ -14,10 +16,12 @@ class Color(Enum):
     END = "\033[0m"
 
 
-def d_print(text, color, show_time):
+def d_print(text, color, show_time, details=None):
     """Prints a message in the specified color."""
     timestamp = datetime.now().strftime('%H:%M:%S:%f')[:-3]
     prefix = f"[Model Manager ({timestamp})] " if show_time else "[Model Manager] "
+    if details:
+        prefix += f"@ [{details}] "
     print(f"{color.value}{prefix}{Color.END.value}{text}")
 
 def d_message(text, show_time=opts.mm_show_timestamp):
@@ -44,4 +48,10 @@ def d_info(text, show_time=opts.mm_show_timestamp):
 
 def d_debug(text):
     """Prints a debug message in cyan color. Always shows the timestamp."""
-    d_print(text, Color.CYAN, True)
+    caller_frame = inspect.stack()[1]
+    caller_name = os.path.basename(caller_frame.filename)
+    caller_function = caller_frame.function
+    caller_line = caller_frame.lineno
+    details = f"{caller_name}::{caller_function}::{caller_line}"
+    # text = f"{text} (Called from {caller_name}::{caller_function}::{caller_line})"
+    d_print(text, Color.CYAN, True, details)
