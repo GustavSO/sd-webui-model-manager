@@ -16,3 +16,10 @@
 .mm-open-civit.card-button:hover svg {
     fill: blue !important;
 }
+
+.extra-network-control--tag{
+    padding: 0.25rem;
+    align-self: center;
+    display: inline-flex;
+    cursor: pointer;
+}
