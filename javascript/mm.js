@@ -251,6 +251,7 @@ const getResponseFromGradio = (maxTimeout = 5000) =>
         target.dispatchEvent(new Event("input"));
 
         observer.disconnect();
+        clearTimeout(timeoutId);
         resolve(response);
       }
     });
@@ -262,7 +263,7 @@ const getResponseFromGradio = (maxTimeout = 5000) =>
       characterData: true,
     });
 
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       console.log(
         "Timeout for getting response from Gradio. Took: " + maxTimeout + "ms"
       );
