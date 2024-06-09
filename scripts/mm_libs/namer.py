@@ -31,7 +31,9 @@ name_mapping = {
 def vaidate_filename(filename: str):
     # This will only happen if the user have turned off the auto trim illegal characters setting
     if IILEGAL_WIN_CHARS.search(filename):
-        d_error("Invalid Filename: Illegal characters detected. Remove them or enable 'Trim Illegal Characters' in settings")
+        d_error(
+            "Invalid Filename: Illegal characters detected. Remove them or enable 'Trim Illegal Characters' in settings"
+        )
         return False
 
     if not filename:
@@ -66,16 +68,9 @@ def format_filename(format: str, model: Model):
             eval_value = remove_excluded_words(eval_value)
             if key == "model_version":
                 if opts.mm_decimalize_versioning:
-                    d_print("Decimalizing versioning")
-                    d_print(f"Before: {eval_value}")
                     eval_value = decimalize_versioning(eval_value)
-                    d_print(f"After: {eval_value}")
                 if opts.mm_capatalize_versioning:
-                    d_print("Capatalizing versioning")
-                    d_print(f"Before: {eval_value}")
                     eval_value = capatalize_versioning(eval_value)
-                    d_print(f"After: {eval_value}")
-
 
         format = format.replace(key, eval_value)
 
@@ -98,12 +93,6 @@ def adjust_filename(filename: str):
 
     if opts.mm_capatalize:
         filename = capatalize(filename)
-
-    # if opts.mm_capatalize_versioning:
-    #     filename = re.sub(r"v(\d+)", lambda x: f"V{x.group(1)}", filename)
-
-    # if opts.mm_decimalize_versioning:
-    #     filename = re.sub(r"V(\d+)(?!\.\d+)", lambda x: f"V{x.group(1)}.0", filename)
 
     if opts.mm_auto_trim_whitespace:
         filename = trim_whitespace(filename)
@@ -130,6 +119,7 @@ def auto_fit_brackets(filename: str):
         filename,
     )
 
+
 def remove_empty_brackets(filename):
     filename = re.sub(r"[\[(\{]\s*[\])}]", "", filename)
     return filename
@@ -144,15 +134,17 @@ def trim_whitespace(filename):
     filename = re.sub(" +", " ", filename)
     return filename
 
+
 def capatalize_versioning(version):
     return re.sub(r"v(\d+)", lambda x: f"V{x.group(1)}", version)
 
+
 def decimalize_versioning(version):
     pattern = r"[Vv](\d+)(,|\.)?(\d*)"
-    
+
     def replace_version(match):
         # If the version number includes a comma, replace it with a dot
-        if match.group(2) == ',':
+        if match.group(2) == ",":
             return f"V{match.group(1)}.{match.group(3)}"
         # If the version number lacks a decimal point, append `.0`
         elif not match.group(2):
@@ -160,5 +152,5 @@ def decimalize_versioning(version):
         # If the version number already includes a dot, return it unchanged
         else:
             return f"V{match.group(1)}.{match.group(3)}"
-    
+
     return re.sub(pattern, replace_version, version)

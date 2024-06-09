@@ -11,12 +11,12 @@ lora_dir = Path(cmd_opts.lora_dir) if cmd_opts.lora_dir else root_path / "models
 # Should also check if the path exists, and if not, default to root_path
 # TODO: This whole thing could do with a refactor
 folders = {
-    "TextualInversion": Path(cmd_opts.embeddings_dir) if cmd_opts.embeddings_dir else root_path / "embeddings",
-    "Hypernetwork": Path(cmd_opts.hypernetwork_dir) if cmd_opts.hypernetwork_dir else root_path / "models" / "hypernetworks",
-    "Checkpoint": Path(cmd_opts.ckpt_dir) if cmd_opts.ckpt_dir else root_path / "models" / "Stable-diffusion",
-    "LORA": lora_dir,
-    "LoCon": lora_dir,
-    "DoRA": lora_dir,
+    "TextualInversion": [Path(cmd_opts.embeddings_dir) if cmd_opts.embeddings_dir else root_path / "embeddings"],
+    "Hypernetwork": [Path(cmd_opts.hypernetwork_dir) if cmd_opts.hypernetwork_dir else root_path / "models" / "hypernetworks"],
+    "Checkpoint": [Path(cmd_opts.ckpt_dir) if cmd_opts.ckpt_dir else root_path / "models" / "Stable-diffusion"],
+    "LORA": [lora_dir],
+    "LoCon": [lora_dir],
+    "DoRA": [lora_dir],
 }
 
 original_folders = {model_type: model_dir for model_type, model_dir in folders.items()}
@@ -36,9 +36,9 @@ def sort_dirs():
     
     folders.update(original_folders)
     for model_type, model_dir in folders.items():
-        if not isinstance(model_dir, Path):
-            model_dir = Path(model_dir)
-        folders[model_type] = [model_dir] + get_subdirs(model_dir, opts.mm_folder_depth)
+        if not isinstance(model_dir[0], Path):
+            model_dir[0] = Path(model_dir[0])
+        folders[model_type] = model_dir + get_subdirs(model_dir[0], opts.mm_folder_depth)
     search_depth = opts.mm_folder_depth
 
 # TODO: Create a refresh dirs function

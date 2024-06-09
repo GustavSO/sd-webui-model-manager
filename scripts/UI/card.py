@@ -1,5 +1,3 @@
-import re, time
-from turtle import down
 import gradio as gr
 
 from scripts.mm_libs.debug import d_print, d_warn
@@ -133,7 +131,7 @@ class Card:
             self.models = models
             self.selected_model = models[0]
             self.selected_image = models[0].images[0][0] if models[0].images else None
-            self.dirdd.update_choices(models[0].type)
+            self.dirdd.update_choices(models[0].type, models[0].main_tag)
             self.visibility = True
         else:
             self.visibility = False

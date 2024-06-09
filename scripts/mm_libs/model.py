@@ -5,6 +5,27 @@ from modules.shared import opts
 # TODO: Add a "recommended strength" field to the metadata
 # Could also expand with additional data like EPOCHS, Reviews, etc.
 
+# Main tags used by Civitai taken from their website
+main_civitai_tags = [
+    "character",
+    "style",
+    "celebrity",
+    "concept",
+    "clothing",
+    "base model",
+    "poses",
+    "background",
+    "tool",
+    "buildings",
+    "vehicle",
+    "objects",
+    "animal",
+    "action",
+    "assets",
+]
+
+
+
 class Model(object):
     def __init__(self, data, model_version):
         self.name = data["name"]
@@ -17,6 +38,7 @@ class Model(object):
         self.download_url = model_version["downloadUrl"]
         self.type = data["type"]
         self.size = convert_size(model_version["files"][0]["sizeKB"]*1024)
+        self.main_tag = get_main_tag(data["tags"])
         self.metadata = {
             "description": "",
             "sd version": model_version["baseModel"],
@@ -30,6 +52,7 @@ class Model(object):
             "notes": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}",
             "model url": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}"
         }
+        print(f"Main Tag: {self.main_tag}\n")
 
     def __str__(self):
         return f"{self.name} {self.version} ({self.creator})"
@@ -43,6 +66,12 @@ def get_trigger_words(words):
     else:
         return ""
 
+def get_main_tag(tags):
+    for tag in tags:
+        if tag in main_civitai_tags:
+            return tag
+
+    return "None"
 
 def convert_size(size):
     if size == 0:
