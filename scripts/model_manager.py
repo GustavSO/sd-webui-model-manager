@@ -5,8 +5,8 @@ from modules.options import categories, options_section, OptionInfo, Options
 
 import gradio as gr
 from scripts.mm_libs import loader
-from scripts.UI import single_model_page, notification_fetcher_page, utilities
-from scripts.mm_libs.debug import d_message, d_warn
+from scripts.UI import hashing_page, single_model_page, notification_fetcher_page
+from scripts.mm_libs.debug import d_warn
 
 
 def on_ui_tabs():
@@ -21,8 +21,8 @@ def on_ui_tabs():
                 single_model_page.UI()
             with gr.Tab("Scrape Civitai Notifications"):
                 notification_fetcher_page.UI()
-        # with gr.Tab("Utilities"):
-        #     utilities.UI()
+        with gr.Tab("Hasher"):
+            hashing_page.UI()
 
         
         def get_model_url(json_file):
@@ -65,7 +65,6 @@ def on_ui_tabs():
         js_open_model_btn.click(get_model_url, inputs=from_js, outputs=to_js)
 
 
-    loader.sort_dirs()
     return [(ui_component, "Model Manager", "model_manager_tab")]
 
 
@@ -124,8 +123,9 @@ def on_ui_settings():
         "mm_print_warnings": OptionInfo(True, "Print Warnings").info("Print warnings to the console, if false the warning messages will only show on the UI"),
         "mm_print_errors": OptionInfo(True, "Print Errors").info("Print errors to the console, if false the error messages will only show on the UI"),
         "mm_print_info": OptionInfo(True, "Print Info").info("Print info to the console, if false the info messages will only show on the UI"),
-        "mm_print_debug": OptionInfo(False, "Print Debug"),
         "mm_show_timestamp": OptionInfo(True, "Show Timestamp").info("Show the timestamp in the console messages"),
+        "mm_print_debug": OptionInfo(False, "Print Debug"),
+        "mm_debug_stacktrace": OptionInfo(False, "Debug Stacktrace").info("Show the stacktrace in the debug console messages. Only works if 'Print Debug' is enabled"),
         "mm_testing_model_url": OptionInfo("", "Testing Model URL").info("URL to test the model fetching with. If filled, each time the model fetching is triggered, this URL will be used. Useful for testing the fetching without having to go to the Civitai website. Leave empty to disable"),
         }))
     

@@ -37,7 +37,10 @@ class Directory_Dropdown:
         )
 
     def update_choices(self, model_type: str, main_tag: str):
-        # If the path and main tag are the same as the previous, skip the update
+        model_type = process_model_type(model_type)
+
+        # If the path and main tag are the same as the previous, skip the update 
+        # TODO: Fix it so that the dropdown will still update even if the type and tag are the same BUT the update_value (dropdown value) is different from the options path
         if compare_model(self.model_type, model_type) and self.main_tag == main_tag:
             return
 
@@ -100,9 +103,15 @@ def compare_model(model_type1: str, model_type2: str) -> bool:
     return model_type1.lower() == model_type2.lower()
 
 
+def process_model_type(model_type: str) -> str:
+    if model_type.lower() in ["dora", "locon"]:
+        d_debug("Model type is DoRA or LoCon. Reading as LORA")
+        return "LORA"
+
+    return model_type
+
 def shorten_path(path: Path, parent: Path) -> str:
     return os.path.relpath(path, parent)
-
 
 def get_short_dirs(model_type: str) -> list[str]:
     return [
