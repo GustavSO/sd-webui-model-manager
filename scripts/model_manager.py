@@ -35,9 +35,12 @@ def on_ui_tabs():
                     if "model url" in data:
                         download_url = data["model url"]
                     elif "notes" in data and data["notes"] != "":
-                        download_url = data["notes"] 
+                        download_url = data["notes"]
+            except FileNotFoundError:
+                d_warn(f"Couldn't find JSON file: {json_file}")
+                return "None" 
             except Exception as e:
-                d_warn(f"Error reading JSON file {e.__class__.__name__}")
+                d_warn(f"Error reading JSON file: {e.__class__.__name__}")
                 return "None"
             
             # TODO: Figure out some way to validate the url, (regex or something) as this causes to much delay
@@ -49,7 +52,7 @@ def on_ui_tabs():
 
 
             if download_url == "None":
-                d_warn("Couldn't find a model URL for the model. Please make sure the JSON file contains a 'model url' or 'notes' field with the URL")
+                d_warn("Couldn't find a model URL for the model. Please make sure the JSON file contains a 'model url' attribute with the URL or use the hasher to get the URL")
             return download_url
 
         # Hidden elements and functions used by JavaScript
