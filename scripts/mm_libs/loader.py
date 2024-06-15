@@ -9,7 +9,11 @@ from scripts.mm_libs.storage import FileDetail
 HASH_FILE_SUFFIXES = [".safetensors", ".pt", ".ckpt"]
 
 root_path = Path.cwd()
-search_depth = opts.mm_folder_depth if opts.mm_folder_depth else 1
+
+try:
+    search_depth = opts.mm_folder_depth if opts.mm_folder_depth else 1
+except AttributeError:
+    search_depth = 1
 
 embeddings_dir = Path(cmd_opts.embeddings_dir) if cmd_opts.embeddings_dir else root_path / "embeddings"
 hypernetwork_dir = Path(cmd_opts.hypernetwork_dir) if cmd_opts.hypernetwork_dir else root_path / "models" / "hypernetworks"
