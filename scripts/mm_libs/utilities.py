@@ -1,4 +1,5 @@
 import gc
+from pathlib import Path
 import sys
 
 def get_obj_size(obj):
@@ -24,3 +25,8 @@ def get_obj_size(obj):
         marked_ids.update(new_referents.keys())
 
     return total_size
+
+
+def get_partial_path(path : Path, parent_value : int):
+    parts = path.parts[-parent_value:]
+    return Path(*parts)

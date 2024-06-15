@@ -52,6 +52,9 @@ def d_info(text):
 
 def d_debug(text, color=Color.CYAN):
     """Prints a debug message in cyan color. Always shows the timestamp."""
+    if not opts.mm_print_debug if hasattr(opts, "mm_print_debug") else False:
+        return
+    
     details = None
     if opts.mm_debug_stacktrace if hasattr(opts, "mm_debug_stacktrace") else False:
         caller_frame = inspect.stack()[1]

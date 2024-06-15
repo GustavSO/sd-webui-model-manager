@@ -9,7 +9,7 @@ import requests
 
 from modules import scripts
 from scripts.mm_libs import loader
-from scripts.mm_libs.debug import Color, d_debug, d_message
+from scripts.mm_libs.debug import Color, d_debug, d_info, d_message
 from scripts.mm_libs.model import convert_size
 from scripts.mm_libs.storage import Storage, FileDetail
 from scripts.mm_libs.utilities import get_obj_size
@@ -84,11 +84,11 @@ def update_cache_file(types) -> dict:
         total_files += len(file_details)
 
     if total_files == 0:
-        d_message("Cache Update Result: No new files found\n")
+        d_message("No new files added to cache\n")
         return storage_instance.to_dict(ui_friendly=True)
 
     storage_instance.update_cache_file()
-    d_message(f"Cache Update Result: Added {total_files} new files\n")
+    d_message(f"Added {total_files} new files to cache\n")
     return storage_instance.to_dict(ui_friendly=True)
 
 
@@ -123,9 +123,8 @@ def hash_file(file, algorithm):
 def hash_files(files, algo) -> dict:
     """Hash a collection of files using the specified algorithm."""
     results = {}
-    d_message(f"Hashing {len(files)} files with {algo}: \n")
     for file in files:
-        d_message(f"{files.index(file) + 1}/{len(files)} - {file}")
+        d_message(f"{files.index(file) + 1}/{len(files)} - {file.name}")
         try:
             results[file] = hash_file(file, algo)
         except Exception as e:
@@ -166,17 +165,18 @@ def perform_hashing(model_types, algorith, multi_process) -> dict:
         # unhashed_files = storage_instance.get_non_hashed_files_by_type_and_algorithm(type, algorith)
 
         if not unhashed_files:
-            d_message(f"{type}: All files are already hashed with {algorith}")
+            d_message(f"{type}: All files are already hashed using {algorith}")
             continue
 
         d_message(
-            f"Found {len(unhashed_files)} unhashed files out of {storage_instance.get_type_count(type)} files for {type}"
+            f"Found {len(unhashed_files)}/{storage_instance.get_type_count(type)} unhashed {type} files"
         )
 
         file_paths = [file.filePath for file in unhashed_files]
         if multi_process:
             # TODO: Implement multi-processing
             hash_results = hash_files_concurrently(file_paths, algorith)
+        d_message(f"Hashing {len(file_paths)} {type} files using {algorith}:")
         hash_results = hash_files(file_paths, algorith)
 
         for file_path, hash_value in hash_results.items():
@@ -185,9 +185,9 @@ def perform_hashing(model_types, algorith, multi_process) -> dict:
             )
 
         storage_instance.update_cache_file()
-        d_message(f"Hashed {len(hash_results)} files with {algorith} for {type}\n")
+        d_message(f"Finished hashing {len(hash_results)} {type} files using {algorith}\n")
 
-    d_message("Hashing complete\n")
+    d_info("Hashing complete\n")
     return storage_instance.to_dict(ui_friendly=True)
 
 
@@ -215,15 +215,21 @@ def check_civitai():
     initial_files = storage_instance.get_all_hashed_files()
 
     d_debug(f"Found {len(initial_files)} with hashes", Color.GREEN)
+
     cleaned_files = [
         file for file in initial_files if not validate_model_json(Path(file.filePath))
     ]
-    d_debug(
-        f"Ignoring {len(initial_files) - len(cleaned_files)} models with existing model url",
-        Color.YELLOW,
-    )
 
-    d_debug(f"Checking {len(cleaned_files)} against Civitai API: \n", Color.GREEN)
+    if not cleaned_files:
+        d_info("All models already have a model URL\n")
+        return
+
+    if (len(initial_files) - len(cleaned_files)) > 0:
+        d_message(
+            f"{len(initial_files) - len(cleaned_files)}/{len(initial_files)} files already have a model URL. Skipping..."
+        )
+
+    d_message(f"Checking {len(cleaned_files)} against Civitai API...:")
 
     files_updated = 0
     for file in cleaned_files:
@@ -233,8 +239,11 @@ def check_civitai():
         request = f"{api}{file.get_hash()}"
         response = requests.get(request)
 
-        if response.status_code != 200:
-            d_debug(f"Error: {response.status_code}", Color.RED)
+        if response.status_code == 404:
+            d_message(f"Error: Model {file.fileName} not found on Civitai\n")
+            continue
+        elif response.status_code != 200:
+            d_message(f"Error: {response.status_code} \n")
             continue
 
         d_debug(f"Success: {response.status_code}", Color.GREEN)
@@ -247,7 +256,7 @@ def check_civitai():
         update_model_json(Path(file.filePath), civit_page)
         files_updated += 1
 
-    d_debug(f"Civitai check complete - {files_updated} models updated\n", Color.GREEN)
+    d_info(f"Civitai check complete - {files_updated} models updated\n")
     return
 
 
@@ -261,6 +270,7 @@ def update_model_json(model_path: Path, page: str = None):
         with open(json_file, "w", encoding="utf-8") as f:
             json.dump({"model url": page}, f, indent=4)
             d_debug(f"Created JSON file for {model_path.name}", Color.YELLOW)
+            d_message(f"Success: Model URL added to {model_path.name} \n")
         return
 
     # If it exists, add the model url to it
@@ -269,7 +279,8 @@ def update_model_json(model_path: Path, page: str = None):
         data["model url"] = page
         with open(json_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
-            d_debug(f"Model URL added to {model_path.name} \n", Color.GREEN)
+            d_debug(f"Model URL added to {model_path.name}", Color.GREEN)
+            d_message(f"Success: Model URL added to {model_path.name} \n")
 
 
 def purge_cache():
