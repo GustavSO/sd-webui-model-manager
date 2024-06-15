@@ -34,8 +34,6 @@ def on_ui_tabs():
                     data = json.load(f)
                     if "model url" in data:
                         download_url = data["model url"]
-                    elif "notes" in data and data["notes"] != "":
-                        download_url = data["notes"]
             except FileNotFoundError:
                 d_warn(f"Couldn't find JSON file: {json_file}")
                 return "None" 
