@@ -48,8 +48,7 @@ class Model(object):
                 else ""
             ),
             "preferred weight": 0,
-            # Stores the model url both in the notes, visible in the UI, but also in a model url field for easy access.
-            "notes": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}",
+            "notes": f"",
             "model url": f"https://civitai.com/models/{data['id']}?modelVersionId={model_version['id']}",
         }
 

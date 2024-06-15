@@ -1,44 +1,51 @@
-import os
+import hashlib
 from pathlib import Path
+
 from modules.shared import cmd_opts, opts
+from scripts.mm_libs.debug import d_debug
+from scripts.mm_libs.model import convert_size
+from scripts.mm_libs.storage import FileDetail
+
+HASH_FILE_SUFFIXES = [".safetensors", ".pt", ".ckpt"]
 
 root_path = Path.cwd()
-search_depth = -1
 
-lora_dir = Path(cmd_opts.lora_dir) if cmd_opts.lora_dir else root_path / "models" / "Lora"
+try:
+    search_depth = opts.mm_folder_depth if opts.mm_folder_depth else 1
+except AttributeError:
+    search_depth = 1
 
-# Either assign the default locations, or fetch path to the custom location specified in COMMAND_ARGS=
-# Should also check if the path exists, and if not, default to root_path
-# TODO: This whole thing could do with a refactor
-folders = {
-    "TextualInversion": [Path(cmd_opts.embeddings_dir) if cmd_opts.embeddings_dir else root_path / "embeddings"],
-    "Hypernetwork": [Path(cmd_opts.hypernetwork_dir) if cmd_opts.hypernetwork_dir else root_path / "models" / "hypernetworks"],
-    "Checkpoint": [Path(cmd_opts.ckpt_dir) if cmd_opts.ckpt_dir else root_path / "models" / "Stable-diffusion"],
-    "LORA": [lora_dir],
-    "LoCon": [lora_dir],
-    "DoRA": [lora_dir],
-}
-
-original_folders = {model_type: model_dir for model_type, model_dir in folders.items()}
+embeddings_dir = Path(cmd_opts.embeddings_dir) if cmd_opts.embeddings_dir else root_path / "embeddings"
+hypernetwork_dir = Path(cmd_opts.hypernetwork_dir) if cmd_opts.hypernetwork_dir else root_path / "models" / "hypernetworks"
+ckpt_dir = Path(cmd_opts.ckpt_dir) if cmd_opts.ckpt_dir else root_path / "models" / "Stable-diffusion"
+lora_dir = Path(cmd_opts.lora_dir) if cmd_opts.lora_dir else root_path / "models-symlink" / "Lora"
 
 def get_subdirs(dir, depth=1):
     if depth < 1:
         return []
     subdirs = [subdir for subdir in dir.iterdir() if subdir.is_dir()]
     for subdir in subdirs:
-        subdirs.extend(get_subdirs(subdir, depth-1))
+        subdirs.extend(get_subdirs(subdir, depth - 1))
     return subdirs
 
-def sort_dirs():
-    global search_depth
-    if opts.mm_folder_depth == search_depth:
-        return
-    
-    folders.update(original_folders)
-    for model_type, model_dir in folders.items():
-        if not isinstance(model_dir[0], Path):
-            model_dir[0] = Path(model_dir[0])
-        folders[model_type] = model_dir + get_subdirs(model_dir[0], opts.mm_folder_depth)
-    search_depth = opts.mm_folder_depth
+folders = {
+    "TextualInversion": [embeddings_dir] + get_subdirs(embeddings_dir, search_depth),
+    "Hypernetwork": [hypernetwork_dir] + get_subdirs(hypernetwork_dir, search_depth),
+    "Checkpoint": [ckpt_dir] + get_subdirs(ckpt_dir, search_depth),
+    "LORA": [lora_dir] + get_subdirs(lora_dir, search_depth),
+    # "LoCon": [lora_dir] + get_subdirs(lora_dir, search_depth),
+    # "DoRA": [lora_dir] + get_subdirs(lora_dir, search_depth) # Keeping this for now, will be removed if no conflicts arise
+}
 
+
+def get_all_files_of_type(model_type, valid_suffix=HASH_FILE_SUFFIXES) -> list[Path]:
+    if model_type not in folders:
+        print(f"Model type {model_type} not found")
+        return
+    files = []
+    for folder in folders[model_type]:
+        for file in folder.iterdir():
+            if file.is_file() and (not valid_suffix or file.suffix in valid_suffix):
+                files.append(file)
+    return files
 # TODO: Create a refresh dirs function
