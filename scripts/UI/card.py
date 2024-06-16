@@ -2,7 +2,7 @@ import gradio as gr
 
 from scripts.mm_libs.debug import d_message, d_warn
 from scripts.mm_libs.model import Model, sanitize_trigger_words
-from scripts.mm_libs import downloader, namer
+from scripts.mm_libs import fetcher, downloader, namer
 from .directory_dropdown import Directory_Dropdown as dir_dd
 from modules import ui 
 from modules.shared import opts

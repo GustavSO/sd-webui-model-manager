@@ -5,7 +5,7 @@ from functools import reduce
 from .smallcard import Card as C1
 from .card import Card as C2
 from scripts.mm_libs.model import Model
-from scripts.mm_libs import downloader
+from scripts.mm_libs import fetcher
 from scripts.mm_libs import selenium_dynamic as sd
 from itertools import zip_longest
 from modules import shared

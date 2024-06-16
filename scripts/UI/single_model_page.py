@@ -1,7 +1,7 @@
 import gradio as gr
 from tkinter import Tk, TclError
 from modules import shared
-from scripts.mm_libs import downloader, loader
+from scripts.mm_libs import fetcher, loader
 from scripts.mm_libs.debug import *
 from .card import Card
 
@@ -19,7 +19,7 @@ def UI():
                 d_warn("Clipboard is empty, using current input as URL")
                 return input
 
-        models, index = downloader.fetch(input)
+        models, index = fetcher.fetch(input)
         if models:
             model_card.insert_models(models, index)
         return input
