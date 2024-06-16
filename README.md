@@ -35,11 +35,19 @@ https://github.com/GustavSO/sd-webui-model-manager/assets/65391253/7bcac98f-1600
    - *Currently only works for LoRA, DoRA and LyCORIS*
 
 ### Quick Access to Source 🌐
-- Easily open the original download page for any model, allowing you to quickly revisit and explore the source.-
-  - *Currently only works on models downloaded using Model Manager.*
- 
+- Easily open the original download page for any model by clicking the globe button on the model card, allowing you to quickly revisit and explore the source.
+
+### Cache, Hash, and Fetch Additional Information 🗃️
+- Cache your installed models, offering a detailed data breakdown for each model type.
+- Hash your installed models and use these hashes to retrieve additional information via the Civitai API.
+  - *Currently only fetches the orignal download url*
+- Supports different hashing algorithms:
+  - CRC-32
+  - Blake3
+  - SHA256.
+  
 ### Highly Customizable 🎛️
 - Extensive settings provide numerous options for users to tailor features to their specific needs and preferences.
 
-### Work-in-progress 🚧
+### Work-in-Progress 🚧
 - Scrape models from your Civitai notifications page
