@@ -51,6 +51,10 @@ def remove_excluded_words(filename: str):
         if opts.mm_excluded_words_or_phrases
         else []
     )
+
+    # Sort the excluded words by length in descending order, this is to ensure that the longest phrases are removed first to avoid partial removal
+    excluded_words.sort(key=len, reverse=True)
+
     for word in excluded_words:
         word = word.strip()
         filename = re.sub(rf"\b{word}\b", "", filename, flags=re.IGNORECASE)
