@@ -1,5 +1,3 @@
-from logging.config import valid_ident
-from re import S
 import gradio as gr
 
 from scripts.mm_libs import hasher, loader
@@ -119,7 +117,7 @@ def purge_cache(button_value):
     #     return [PURGE_SYMBOL, Storage().to_dict(ui_friendly=True)]
         
 def get_storage_size():
-    d_message("Getting the size of the storage object in memory (not the cache file)")
+    d_debug("Getting the size of the storage object in memory (not the cache file)")
     hasher.get_storage_size()
 
 def display_cache():

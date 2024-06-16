@@ -5,7 +5,7 @@ from modules.options import categories, options_section, OptionInfo, Options
 
 import gradio as gr
 from scripts.mm_libs import loader
-from scripts.UI import hashing_page, single_model_page, notification_fetcher_page
+from scripts.UI import hashing_page, single_model_page, notification_fetcher_page, utilities_page
 from scripts.mm_libs.debug import d_warn
 
 
@@ -23,6 +23,8 @@ def on_ui_tabs():
                 notification_fetcher_page.UI()
         with gr.Tab("Hasher"):
             hashing_page.UI()
+        # with gr.Tab("Utilities"):
+        #     utilities_page.UI()
 
         
         def get_model_url(json_file):

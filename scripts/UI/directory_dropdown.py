@@ -2,11 +2,15 @@ import os
 import gradio as gr
 
 from modules.shared import opts
-from scripts.mm_libs.debug import d_debug, d_message
+from scripts.mm_libs.debug import d_debug, d_message, d_warn
 from scripts.mm_libs.loader import folders
 
 from pathlib import Path
+from modules.ui_components import ToolButton
+import subprocess
 
+
+FOLDER_SYMBOL = '\U0001f4c1\ufe0f' #📁
 
 # Reusable Gradio Dropdown for selecting target directories
 class Directory_Dropdown:
@@ -18,14 +22,17 @@ class Directory_Dropdown:
         self.main_tag = None
 
         # Gradio Structure
-        self.dropdown = gr.Dropdown(
-            label="Directory",
-            info="Select the target directory for the file(s).",
-            choices=[],
-            interactive=True,
-        )
+        with gr.Row():
+            self.dropdown = gr.Dropdown(
+                label="Directory",
+                info="Select the target directory for the file(s).",
+                choices=[],
+                interactive=True,
+            )
+            open_folder_btn = ToolButton(FOLDER_SYMBOL, tooltip="Open Folder")
 
         self.dropdown.select(self.change_directory)
+        open_folder_btn.click(self.open_folder)
 
     def get_components(self):
         return self.dropdown
@@ -49,7 +56,7 @@ class Directory_Dropdown:
         self.main_tag = main_tag
 
         if option_path and option_path in folders[model_type]:
-            d_message(f"Options path in folders: {option_path}")
+            d_debug(f"Options path in folders: {option_path}")
             self.update_value = shorten_path(option_path, folders[model_type][0].parent)
             self.selected_dir = option_path
             return
@@ -62,6 +69,14 @@ class Directory_Dropdown:
         self.update_value = shorten_path(
             self.selected_dir, folders[self.model_type][0].parent
         )
+    
+    def open_folder(self):
+        if self.selected_dir:
+            subprocess.Popen(f'explorer "{self.selected_dir}"')
+        else:
+            d_warn("No directory selected. Cannot open folder.")
+
+
 
 
 def check_options(model_type: str, main_tag: str) -> Path:
