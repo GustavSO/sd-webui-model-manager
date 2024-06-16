@@ -37,7 +37,9 @@ def fetch(model_url) -> list[Model]:
     r = requests.get(civit_api + url[0])
 
     if not r.ok:
-        d_warn("Couldn't contact CivitAI API, try again")
+        error = f"Error: {r.status_code} - {r.text}"
+        warning = "Couldn't contact CivitAI API, try again"
+        d_warn(warning), d_message(error)
         return
 
     try:
@@ -73,6 +75,8 @@ def download_model(file_target, model: Model, image, progress):
 
     # Retrive file format from the Content-Disposition header
     file_format = r_model.headers["Content-Disposition"].split(".")[-1].strip('"')
+
+    d_message("Pik")
 
     if not r_model.ok:
         warning = "Couldn't contact CivitAI API, try again"

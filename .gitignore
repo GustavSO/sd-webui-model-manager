@@ -14,6 +14,6 @@ __pycache__
 # Built Visual Studio Code Extensions
 *.vsix
 
-# Ignoring data folder
-data/
 
+data/
+TODO.md
