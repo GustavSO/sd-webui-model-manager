@@ -21,12 +21,12 @@ def fetch(model_url) -> list[Model]:
     model_id, version_number = url_to_id_version(model_url)
     if model_id is None:
         d_warn("Invalid URL or ID. Please enter a valid CivitAI model URL or ID.")
-        return []
+        return None, None
 
     full_url = civit_api + model_id
     model_data = get_model_data(full_url)
     if model_data is None:
-        return []
+        return None, None
 
     model_list, index = process_model_versions(model_data, version_number)
     return model_list, index
@@ -40,6 +40,11 @@ def check_api_key():
 def get_model_data(model_url):
     """Performs the API request to get model data."""
     response = requests.get(model_url)
+
+    if response.status_code == 404:
+        d_warn("Model not found. Please check the model URL or ID."), d_message(f"Error: {response.status_code} - {response.text}. Sometimes the model isn't available through the API. In that case, a manual download is needed. Sorry")
+        return None
+
     if not response.ok:
         d_warn("Couldn't contact CivitAI API, try again."), d_message(f"Error: {response.status_code} - {response.text}")
         return None
@@ -82,6 +87,3 @@ def url_to_id_version(url) -> tuple[str, str]:
         return model_id, version_number
 
     return None, None
-
-
-
