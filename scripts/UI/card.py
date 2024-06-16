@@ -77,7 +77,7 @@ class Card:
             )
 
         download_btn.click(
-            namer.adjust_filename, self.filename_input, self.filename_input
+            name_process, self.filename_input, self.filename_input
         ).then(
             fn=self.ready_download,
             inputs=[self.filename_input, self.model_trigger_words_text],
@@ -188,3 +188,9 @@ class Card:
             self.selected_image,
             progress,
         )
+
+
+def name_process(name):
+    if opts.mm_format_on_download:
+        return namer.adjust_filename(name)
+    return name

@@ -62,15 +62,19 @@ def format_filename(format: str, model: Model):
     if not format:
         return remove_excluded_words(f"{model.name})")
 
+
     for key, value in name_mapping.items():
         eval_value = str(eval(value))
         if key in ["model_name", "model_version"]:
             eval_value = remove_excluded_words(eval_value)
             if key == "model_version":
-                if opts.mm_decimalize_versioning:
-                    eval_value = decimalize_versioning(eval_value)
-                if opts.mm_capatalize_versioning:
-                    eval_value = capatalize_versioning(eval_value)
+                if opts.mm_skip_identical_version and eval_value == model.name:
+                    eval_value = ""
+                else:
+                    if opts.mm_decimalize_versioning:
+                        eval_value = decimalize_versioning(eval_value)
+                    if opts.mm_capatalize_versioning:
+                        eval_value = capatalize_versioning(eval_value)
 
         format = format.replace(key, eval_value)
 
