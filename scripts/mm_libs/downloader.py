@@ -1,3 +1,4 @@
+from calendar import c
 import math
 import re
 import time
@@ -6,35 +7,34 @@ import gradio as gr
 import json
 
 from .model import Model, convert_size
-from .debug import d_info, d_message, d_warn
+from .debug import d_debug, d_info, d_message, d_warn
 from tqdm import tqdm
 from pathlib import Path
 from modules.shared import opts
 
 civit_api = "https://civitai.com/api/v1/models/"
-civit_api_alt = "https://civitai.com/api/v1/model-versions/"
-civit_pattern = "(?<=^https:\/\/civitai.com\/models\/)[\d]+|^[\d]+$"
-
+civitai_model_id_version_pattern = r"https:\/\/civitai.com\/models\/(\d+)(?:\?modelVersionId=(\d+))?"
 
 # Fetches model data from CivitAI API.
 # Returns a list of Model objects used to display the model info in the Card components
-# TODO: Add support for retrieving sub models directly
 # TODO: Clean up the code, it's a mess
 def fetch(model_url) -> list[Model]:
+    d_debug(f"Fetching model data from CivitAI API: {model_url}")
     # Check if API key is present
     if not opts.mm_supress_API_warnings and not opts.mm_civitai_api_key:
         info = "No API key set. Some models may require authentication to download, please add your API key to the settings. This warning can be supressed in the settings"
         d_info(info)
 
-    url = re.search(civit_pattern, model_url)
+    model_id, version_number = url_to_id_version(model_url)
+    model_url = civit_api + model_id
 
-    if not url:
+    if not model_url:
         d_warn(
             "Invalid URL, please enter a valid CivitAI model URL or ID. Example: https://civitai.com/models/1234 or 1234"
         )
         return
 
-    r = requests.get(civit_api + url[0])
+    r = requests.get(model_url)
 
     if not r.ok:
         error = f"Error: {r.status_code} - {r.text}"
@@ -49,11 +49,20 @@ def fetch(model_url) -> list[Model]:
         d_message(f"Error: {r.status_code} - {r.text}")
         return
 
+    index = 0
+    if version_number:
+        for version in model_data["modelVersions"]:
+            if version["id"] == int(version_number):
+                # Get the index from the "index" attribute
+                index = version["index"]
+                d_debug(f"Version number found: {version_number}, index: {index}")
+                break
+
     model_list = []
     for model_version in model_data["modelVersions"]:
         model_list = model_list + [Model(model_data, model_version)]
 
-    return model_list
+    return model_list, index
 
 
 def download_model(file_target, model: Model, image, progress):
@@ -75,8 +84,6 @@ def download_model(file_target, model: Model, image, progress):
 
     # Retrive file format from the Content-Disposition header
     file_format = r_model.headers["Content-Disposition"].split(".")[-1].strip('"')
-
-    d_message("Pik")
 
     if not r_model.ok:
         warning = "Couldn't contact CivitAI API, try again"
@@ -136,3 +143,18 @@ def save_file(file: str, request: requests.Response, progress):
 def dump_metadata(file, metadata):
     with open(f"{file}.json", "w", encoding="utf8") as metafile:
         json.dump(metadata, metafile, indent=4)
+
+
+
+def url_to_id_version(url) -> tuple[str, str]:
+    '''Extracts the model ID and version number from a Civitai URL or a standalone number.'''
+
+    if url.isdigit():
+        return url, None
+    
+    match = re.search(civitai_model_id_version_pattern, url)
+    if match:
+        model_id, version_number = match.groups()
+        return model_id, version_number
+
+    return None, None

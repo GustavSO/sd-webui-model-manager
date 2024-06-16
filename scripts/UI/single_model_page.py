@@ -19,9 +19,9 @@ def UI():
                 d_warn("Clipboard is empty, using current input as URL")
                 return input
 
-        models = downloader.fetch(input)
+        models, index = downloader.fetch(input)
         if models:
-            model_card.insert_models(models)
+            model_card.insert_models(models, index)
         return input
 
     with gr.Row():

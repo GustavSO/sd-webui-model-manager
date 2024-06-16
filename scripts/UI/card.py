@@ -137,12 +137,12 @@ class Card:
             self.dirdd.get_updates(),
         ]
 
-    def insert_models(self, models: list[Model] = None):
+    def insert_models(self, models: list[Model] = None, version_index=0):
         if models:
             self.models = models
-            self.selected_model = models[0]
-            self.selected_image = models[0].images[0][0] if models[0].images else None
-            self.dirdd.update_choices(models[0].type, models[0].main_tag)
+            self.selected_model = models[version_index]
+            self.selected_image = models[version_index].images[0][0] if models[version_index].images else None
+            self.dirdd.update_choices(models[version_index].type, models[version_index].main_tag)
             self.visibility = True
         else:
             self.visibility = False
