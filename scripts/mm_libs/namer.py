@@ -62,13 +62,12 @@ def format_filename(format: str, model: Model):
     if not format:
         return remove_excluded_words(f"{model.name})")
 
-
     for key, value in name_mapping.items():
         eval_value = str(eval(value))
         if key in ["model_name", "model_version"]:
             eval_value = remove_excluded_words(eval_value)
             if key == "model_version":
-                if opts.mm_skip_identical_version and eval_value == model.name:
+                if opts.mm_skip_identical_version and model.name == model.version:
                     eval_value = ""
                 else:
                     if opts.mm_decimalize_versioning:
@@ -140,10 +139,12 @@ def trim_whitespace(filename):
 
 
 def capatalize_versioning(version):
+    '''Capatalizes version numbers. For example, `v1` becomes `V1`.'''
     return re.sub(r"v(\d+)", lambda x: f"V{x.group(1)}", version)
 
 
 def decimalize_versioning(version):
+    '''Converts version numbers to decimal format. For example, `V1` becomes `V1.0`.'''
     pattern = r"[Vv](\d+)(,|\.)?(\d*)"
 
     def replace_version(match):
