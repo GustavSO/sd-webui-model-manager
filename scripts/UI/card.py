@@ -2,7 +2,7 @@ import gradio as gr
 
 from scripts.mm_libs.debug import d_message, d_warn
 from scripts.mm_libs.model import Model, sanitize_trigger_words
-from scripts.mm_libs import downloader, namer
+from scripts.mm_libs import fetcher, downloader, namer
 from .directory_dropdown import Directory_Dropdown as dir_dd
 from modules import ui 
 from modules.shared import opts
@@ -77,7 +77,7 @@ class Card:
             )
 
         download_btn.click(
-            namer.adjust_filename, self.filename_input, self.filename_input
+            name_process, self.filename_input, self.filename_input
         ).then(
             fn=self.ready_download,
             inputs=[self.filename_input, self.model_trigger_words_text],
@@ -137,12 +137,12 @@ class Card:
             self.dirdd.get_updates(),
         ]
 
-    def insert_models(self, models: list[Model] = None):
+    def insert_models(self, models: list[Model] = None, version_index=0):
         if models:
             self.models = models
-            self.selected_model = models[0]
-            self.selected_image = models[0].images[0][0] if models[0].images else None
-            self.dirdd.update_choices(models[0].type, models[0].main_tag)
+            self.selected_model = models[version_index]
+            self.selected_image = models[version_index].images[0][0] if models[version_index].images else None
+            self.dirdd.update_choices(models[version_index].type, models[version_index].main_tag)
             self.visibility = True
         else:
             self.visibility = False
@@ -188,3 +188,9 @@ class Card:
             self.selected_image,
             progress,
         )
+
+
+def name_process(name):
+    if opts.mm_format_on_download:
+        return namer.adjust_filename(name)
+    return name

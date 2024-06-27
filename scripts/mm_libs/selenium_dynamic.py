@@ -10,7 +10,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.by import By
 
-from .downloader import fetch
+from .fetcher import fetch
 from .model import Model
 
 from modules import shared

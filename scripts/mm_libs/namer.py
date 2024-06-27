@@ -51,6 +51,10 @@ def remove_excluded_words(filename: str):
         if opts.mm_excluded_words_or_phrases
         else []
     )
+
+    # Sort the excluded words by length in descending order, this is to ensure that the longest phrases are removed first to avoid partial removal
+    excluded_words.sort(key=len, reverse=True)
+
     for word in excluded_words:
         word = word.strip()
         filename = re.sub(rf"\b{word}\b", "", filename, flags=re.IGNORECASE)
@@ -67,10 +71,13 @@ def format_filename(format: str, model: Model):
         if key in ["model_name", "model_version"]:
             eval_value = remove_excluded_words(eval_value)
             if key == "model_version":
-                if opts.mm_decimalize_versioning:
-                    eval_value = decimalize_versioning(eval_value)
-                if opts.mm_capatalize_versioning:
-                    eval_value = capatalize_versioning(eval_value)
+                if opts.mm_skip_identical_version and model.name == model.version:
+                    eval_value = ""
+                else:
+                    if opts.mm_decimalize_versioning:
+                        eval_value = decimalize_versioning(eval_value)
+                    if opts.mm_capatalize_versioning:
+                        eval_value = capatalize_versioning(eval_value)
 
         format = format.replace(key, eval_value)
 
@@ -136,10 +143,12 @@ def trim_whitespace(filename):
 
 
 def capatalize_versioning(version):
+    '''Capatalizes version numbers. For example, `v1` becomes `V1`.'''
     return re.sub(r"v(\d+)", lambda x: f"V{x.group(1)}", version)
 
 
 def decimalize_versioning(version):
+    '''Converts version numbers to decimal format. For example, `V1` becomes `V1.0`.'''
     pattern = r"[Vv](\d+)(,|\.)?(\d*)"
 
     def replace_version(match):

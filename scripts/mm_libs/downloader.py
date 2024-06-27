@@ -1,90 +1,30 @@
-import math
-import re
 import time
 import requests
-import gradio as gr
 import json
 
 from .model import Model, convert_size
-from .debug import d_info, d_message, d_warn
+from .debug import d_debug, d_info, d_message, d_warn
 from tqdm import tqdm
 from pathlib import Path
 from modules.shared import opts
 
-civit_api = "https://civitai.com/api/v1/models/"
-civit_api_alt = "https://civitai.com/api/v1/model-versions/"
-civit_pattern = "(?<=^https:\/\/civitai.com\/models\/)[\d]+|^[\d]+$"
 
-
-# Fetches model data from CivitAI API.
-# Returns a list of Model objects used to display the model info in the Card components
-# TODO: Add support for retrieving sub models directly
-# TODO: Clean up the code, it's a mess
-def fetch(model_url) -> list[Model]:
-    # Check if API key is present
-    if not opts.mm_supress_API_warnings and not opts.mm_civitai_api_key:
-        info = "No API key set. Some models may require authentication to download, please add your API key to the settings. This warning can be supressed in the settings"
-        d_info(info)
-
-    url = re.search(civit_pattern, model_url)
-
-    if not url:
-        d_warn(
-            "Invalid URL, please enter a valid CivitAI model URL or ID. Example: https://civitai.com/models/1234 or 1234"
-        )
-        return
-
-    r = requests.get(civit_api + url[0])
-
-    if not r.ok:
-        d_warn("Couldn't contact CivitAI API, try again")
-        return
-
-    try:
-        model_data = r.json()
-    except json.JSONDecodeError:
-        d_warn("Couldn't decode CivitAI API response, try again. Servers might be down")
-        d_message(f"Error: {r.status_code} - {r.text}")
-        return
-
-    model_list = []
-    for model_version in model_data["modelVersions"]:
-        model_list = model_list + [Model(model_data, model_version)]
-
-    return model_list
-
-
-def download_model(file_target, model: Model, image, progress):
+def download_model(file_target, model: Model, image_url, progress_callback):
+    """
+    Initiates the download of a model and its image if provided.
+    """
     d_message("Requesting download from CivitAI")
+    model_response = fetch_model_data(model.download_url)
 
-    # Read more about their API Key authentication here: https://education.civitai.com/civitais-guide-to-downloading-via-api/
-    r_model = requests.get(
-        model.download_url,
-        headers={"Authorization": f"Bearer {opts.mm_civitai_api_key}"},
-        stream=True,
-    )
-
-    d_message(f"Response Status Code: {r_model.status_code}")
-
-    if r_model.status_code == 401:
-        error = "Required authentication failed, please add your Civitai API key in the settings or ensure it is correct"
-        gr.Warning(error)
+    if model_response is None:
         return
 
-    # Retrive file format from the Content-Disposition header
-    file_format = r_model.headers["Content-Disposition"].split(".")[-1].strip('"')
+    file_format = extract_file_format(model_response)
+    save_file(f"{file_target}.{file_format}", model_response, progress_callback)
 
-    if not r_model.ok:
-        warning = "Couldn't contact CivitAI API, try again"
-        error = f"Error: {r_model.status_code} - {r_model.text}"
-        d_warn(warning), d_message(error)
-        return
-
-    save_file(f"{file_target}.{file_format}", r_model, progress)
-
-    if image:
-        r_img = requests.get(image, allow_redirects=True)
-        save_file(f"{file_target}.jpeg", r_img, progress)
+    if image_url:
+            image_response = fetch_image_data(image_url)
+            save_file(f"{file_target}.jpeg", image_response, progress_callback)
 
     if model.type in ("LORA", "LoCon", "DoRA"):
         dump_metadata(file_target, model.metadata)
@@ -92,43 +32,87 @@ def download_model(file_target, model: Model, image, progress):
     d_info("Download Complete")
 
 
-def save_file(file: str, request: requests.Response, progress):
+def fetch_model_data(download_url):
+    """
+    Fetches model data from the given download URL.
+    """
+    response = requests.get(
+        download_url,
+        headers={"Authorization": f"Bearer {opts.mm_civitai_api_key}"},
+        stream=True,
+    )
 
-    if Path(file).exists():
-        d_warn(f"{file} already exists, skipping download")
+    if response.status_code == 401:
+        d_warn("Required authentication failed, please add your Civitai API key in the settings or ensure it is correct")
+        return None
+
+    if not response.ok:
+        d_warn(f"Couldn't contact CivitAI API, try again."), d_message(f"Error: {response.status_code} - {response.text}")
+        return None
+
+    return response
+
+
+def fetch_image_data(image_url):
+    """
+    Fetches image data from the given URL.
+    """
+    return requests.get(image_url, allow_redirects=True)
+
+
+def extract_file_format(response):
+    """
+    Extracts the file format from the Content-Disposition header of the response.
+    """
+    return response.headers["Content-Disposition"].split(".")[-1].strip('"')
+
+
+def save_file(file_path, response, progress_callback):
+    """
+    Saves the file from the response to the given file path, updating progress.
+    """
+    if Path(file_path).exists():
+        d_warn(f"{file_path} already exists, skipping download")
         return
 
-    total = int(request.headers.get("content-length", 0))
-    
-    with open(file, "wb") as modelfile, tqdm(
-        desc=file.split("\\")[-1],
-        total=total,
+    total_size = int(response.headers.get("content-length", 0))
+    with open(file_path, "wb") as file, tqdm(
+        desc=Path(file_path).name,
+        total=total_size,
         unit="iB",
         unit_scale=True,
         unit_divisor=1024,
-    ) as bar:
-        for chunk in request.iter_content(chunk_size=1024 * 64):
-            size = modelfile.write(chunk)
-
-            downloaded_size = convert_size((bar.n + size))
-            total_size = convert_size(total)
-            speed = (
-                f"Speed: {convert_size(bar.format_dict['rate'])}/s"
-                if bar.format_dict["rate"]
-                else "N/A"
-            )
-
-            if bar.n > 0:
-                eta = (total - bar.n) * bar.format_dict.get("elapsed", 0) / bar.n
-                formatted_eta = "ETA: " + time.strftime("%H:%M:%S", time.gmtime(eta))
-            else:
-                formatted_eta = "ETA: N/A"
-
-            description = f"{bar.desc} - {downloaded_size}/{total_size} - {speed} - {formatted_eta}"
-            progress((bar.n + size) / total, desc=description)
-            bar.update(size)
+    ) as progress_bar:
+        for chunk in response.iter_content(chunk_size=1024 * 64):
+            file.write(chunk)
+            update_progress(progress_bar, chunk, total_size, progress_callback)
 
 
-def dump_metadata(file, metadata):
-    with open(f"{file}.json", "w", encoding="utf8") as metafile:
+def update_progress(progress_bar, chunk, total_size, progress_callback):
+    """
+    Updates the progress bar and callback with the current download progress.
+    """
+    progress_bar.update(len(chunk))
+    downloaded_size = convert_size(progress_bar.n)
+    total_size_formatted = convert_size(total_size)
+    speed = f"Speed: {convert_size(progress_bar.format_dict['rate'])}/s" if progress_bar.format_dict["rate"] else "N/A"
+    eta = calculate_eta(progress_bar, total_size)
+    description = f"{progress_bar.desc} - {downloaded_size}/{total_size_formatted} - {speed} - ETA: {eta}"
+    progress_callback(progress_bar.n / total_size, desc=description)
+
+
+def calculate_eta(progress_bar, total_size):
+    """
+    Calculates the estimated time of arrival (ETA) for the download.
+    """
+    if progress_bar.n > 0:
+        eta_seconds = (total_size - progress_bar.n) * progress_bar.format_dict.get("elapsed", 0) / progress_bar.n
+        return time.strftime("%H:%M:%S", time.gmtime(eta_seconds))
+
+
+def dump_metadata(file_target, metadata):
+    """
+    Dumps the model metadata into a JSON file.
+    """
+    with open(f"{file_target}.json", "w", encoding="utf8") as metafile:
         json.dump(metadata, metafile, indent=4)
